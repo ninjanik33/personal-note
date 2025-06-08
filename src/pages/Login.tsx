@@ -28,8 +28,8 @@ const Login = () => {
 
   // Pre-fill with default credentials for demo purposes
   useEffect(() => {
-    setUsername("l3rokens");
-    setPassword("10123012");
+    setUsername("");
+    setPassword("");
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
