@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { toast } from "@/hooks/use-toast";
+import { AppHeader } from "@/components/AppHeader";
 import { NoteSidebar } from "@/components/NoteSidebar";
 import { NoteList } from "@/components/NoteList";
 import { NoteEditor } from "@/components/NoteEditor";
@@ -163,80 +164,60 @@ const Index = () => {
   }
 
   return (
-    <div className="h-screen flex bg-background overflow-hidden">
-      {/* Desktop Sidebar */}
-      <div className="w-80 flex-shrink-0 hidden lg:block">
-        <NoteSidebar onCreateNote={handleCreateNote} />
-      </div>
+    <div className="h-screen flex flex-col bg-background overflow-hidden">
+      {/* App Header */}
+      <AppHeader />
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col lg:flex-row min-h-0">
-        {/* Mobile Header */}
-        <div className="lg:hidden border-b p-4 flex items-center gap-4">
-          <Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2">
-                <Menu className="h-4 w-4" />
-                Menu
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-80 p-0">
-              <NoteSidebar onCreateNote={handleCreateNote} />
-            </SheetContent>
-          </Sheet>
-          <h1 className="font-semibold truncate flex-1">{getCurrentTitle()}</h1>
-          <Button onClick={handleCreateNewNote} size="sm" className="gap-2">
-            <Plus className="h-4 w-4" />
-            {t("note.create")}
-          </Button>
+      {/* Main Layout */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Desktop Sidebar */}
+        <div className="w-80 flex-shrink-0 hidden lg:block">
+          <NoteSidebar onCreateNote={handleCreateNote} />
         </div>
 
-        {/* Note List */}
-        <div className="w-full lg:w-96 border-r flex flex-col min-h-0">
-          <div className="p-4 border-b hidden lg:block flex-shrink-0">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="font-semibold truncate">{getCurrentTitle()}</h2>
-              <div className="flex gap-2">
-                <Button
-                  onClick={handleCreateNewNote}
-                  size="sm"
-                  variant="outline"
-                  className="gap-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  {t("note.create")}
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col lg:flex-row min-h-0">
+          {/* Mobile Header */}
+          <div className="lg:hidden border-b p-4 flex items-center gap-4">
+            <Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Menu className="h-4 w-4" />
+                  Menu
                 </Button>
-                {selectedSubcategoryId && (
+              </SheetTrigger>
+              <SheetContent side="left" className="w-80 p-0">
+                <NoteSidebar onCreateNote={handleCreateNote} />
+              </SheetContent>
+            </Sheet>
+            <h1 className="font-semibold truncate flex-1">
+              {getCurrentTitle()}
+            </h1>
+            <Button onClick={handleCreateNewNote} size="sm" className="gap-2">
+              <Plus className="h-4 w-4" />
+              {t("note.create")}
+            </Button>
+          </div>
+
+          {/* Note List */}
+          <div className="w-full lg:w-96 border-r flex flex-col min-h-0">
+            <div className="p-4 border-b hidden lg:block flex-shrink-0">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="font-semibold truncate">{getCurrentTitle()}</h2>
+                <div className="flex gap-2">
                   <Button
-                    onClick={() => handleCreateNote(selectedSubcategoryId)}
+                    onClick={handleCreateNewNote}
                     size="sm"
+                    variant="outline"
                     className="gap-2"
                   >
                     <Plus className="h-4 w-4" />
-                    Quick Add
+                    {t("note.create")}
                   </Button>
-                )}
-              </div>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              {filteredNotes.length}{" "}
-              {filteredNotes.length === 1 ? "note" : "notes"}
-            </p>
-          </div>
-
-          <div className="flex-1 overflow-hidden">
-            <div className="h-full overflow-y-auto custom-scrollbar">
-              <div className="p-4">
-                <div className="lg:hidden mb-4 flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">
-                    {filteredNotes.length}{" "}
-                    {filteredNotes.length === 1 ? "note" : "notes"}
-                  </p>
                   {selectedSubcategoryId && (
                     <Button
                       onClick={() => handleCreateNote(selectedSubcategoryId)}
                       size="sm"
-                      variant="outline"
                       className="gap-2"
                     >
                       <Plus className="h-4 w-4" />
@@ -244,67 +225,96 @@ const Index = () => {
                     </Button>
                   )}
                 </div>
-                <NoteList notes={filteredNotes} onEditNote={handleEditNote} />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {filteredNotes.length}{" "}
+                {filteredNotes.length === 1 ? "note" : "notes"}
+              </p>
+            </div>
+
+            <div className="flex-1 overflow-hidden">
+              <div className="h-full overflow-y-auto custom-scrollbar">
+                <div className="p-4">
+                  <div className="lg:hidden mb-4 flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground">
+                      {filteredNotes.length}{" "}
+                      {filteredNotes.length === 1 ? "note" : "notes"}
+                    </p>
+                    {selectedSubcategoryId && (
+                      <Button
+                        onClick={() => handleCreateNote(selectedSubcategoryId)}
+                        size="sm"
+                        variant="outline"
+                        className="gap-2"
+                      >
+                        <Plus className="h-4 w-4" />
+                        Quick Add
+                      </Button>
+                    )}
+                  </div>
+                  <NoteList notes={filteredNotes} onEditNote={handleEditNote} />
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Note Detail/Editor */}
-        <div className="flex-1 p-4">
-          {editingNote ? (
-            <NoteEditor
-              note={editingNote}
-              onSave={handleSaveNote}
-              onCancel={handleCancelEdit}
-            />
-          ) : creatingNoteForSubcategory ? (
-            <NoteEditor
-              subcategoryId={creatingNoteForSubcategory}
-              onSave={handleSaveNote}
-              onCancel={handleCancelEdit}
-            />
-          ) : isCreatingNewNote ? (
-            <NoteEditor onSave={handleSaveNote} onCancel={handleCancelEdit} />
-          ) : selectedNote ? (
-            <NoteDetailView
-              note={selectedNote}
-              onEdit={() => handleEditNote(selectedNote)}
-            />
-          ) : (
-            <Card className="h-full flex items-center justify-center">
-              <CardContent className="text-center">
-                <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                <CardTitle className="mb-2">{t("app.title")}</CardTitle>
-                <p className="text-muted-foreground mb-4">
-                  {filteredNotes.length === 0
-                    ? "No notes found. Create your first note to get started!"
-                    : "Select a note to view or edit it"}
-                </p>
-                <div className="flex gap-2 justify-center">
-                  <Button onClick={handleCreateNewNote} className="gap-2">
-                    <Plus className="h-4 w-4" />
-                    {t("note.create")}
-                  </Button>
-                  {selectedSubcategoryId && (
-                    <Button
-                      onClick={() => handleCreateNote(selectedSubcategoryId)}
-                      variant="outline"
-                      className="gap-2"
-                    >
+          {/* Note Detail/Editor */}
+          <div className="flex-1 p-4">
+            {editingNote ? (
+              <NoteEditor
+                note={editingNote}
+                onSave={handleSaveNote}
+                onCancel={handleCancelEdit}
+              />
+            ) : creatingNoteForSubcategory ? (
+              <NoteEditor
+                subcategoryId={creatingNoteForSubcategory}
+                onSave={handleSaveNote}
+                onCancel={handleCancelEdit}
+              />
+            ) : isCreatingNewNote ? (
+              <NoteEditor onSave={handleSaveNote} onCancel={handleCancelEdit} />
+            ) : selectedNote ? (
+              <NoteDetailView
+                note={selectedNote}
+                onEdit={() => handleEditNote(selectedNote)}
+              />
+            ) : (
+              <Card className="h-full flex items-center justify-center">
+                <CardContent className="text-center">
+                  <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                  <CardTitle className="mb-2">{t("app.title")}</CardTitle>
+                  <p className="text-muted-foreground mb-4">
+                    {filteredNotes.length === 0
+                      ? "No notes found. Create your first note to get started!"
+                      : "Select a note to view or edit it"}
+                  </p>
+                  <div className="flex gap-2 justify-center">
+                    <Button onClick={handleCreateNewNote} className="gap-2">
                       <Plus className="h-4 w-4" />
-                      Quick Add to{" "}
-                      {
-                        categories
-                          .flatMap((cat) => cat.subcategories)
-                          .find((sub) => sub.id === selectedSubcategoryId)?.name
-                      }
+                      {t("note.create")}
                     </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                    {selectedSubcategoryId && (
+                      <Button
+                        onClick={() => handleCreateNote(selectedSubcategoryId)}
+                        variant="outline"
+                        className="gap-2"
+                      >
+                        <Plus className="h-4 w-4" />
+                        Quick Add to{" "}
+                        {
+                          categories
+                            .flatMap((cat) => cat.subcategories)
+                            .find((sub) => sub.id === selectedSubcategoryId)
+                            ?.name
+                        }
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
       </div>
     </div>

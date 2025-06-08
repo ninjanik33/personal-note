@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/collapsible";
 import { SearchBar } from "./SearchBar";
 import { CategoryManager } from "./CategoryManager";
-import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useNoteStore } from "@/store/noteStore";
 import { useAppStore } from "@/store/appStore";
 import { cn } from "@/lib/utils";
@@ -66,9 +65,8 @@ export const NoteSidebar = ({ onCreateNote }: NoteSidebarProps) => {
     <div className="h-full flex flex-col bg-muted/30 border-r">
       {/* Header */}
       <div className="p-4 border-b">
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4">
           <h2 className="text-lg font-semibold">{t("app.title")}</h2>
-          <LanguageSwitcher />
         </div>
         <SearchBar />
       </div>
