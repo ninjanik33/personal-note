@@ -32,7 +32,7 @@ export const NoteDetailView = ({ note, onEdit }: NoteDetailViewProps) => {
       <Card className="h-full flex flex-col">
         <CardHeader className="flex-shrink-0">
           <CardTitle className="flex items-center justify-between">
-            <h1 className="text-xl font-bold">{note.title}</h1>
+            <span className="text-xl font-bold">{note.title}</span>
             <Button onClick={onEdit} size="sm" className="gap-2">
               <Edit className="h-4 w-4" />
               {t("common.edit")}
