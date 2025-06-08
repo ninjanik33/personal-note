@@ -163,14 +163,14 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <div className="h-screen flex bg-background overflow-hidden">
       {/* Desktop Sidebar */}
       <div className="w-80 flex-shrink-0 hidden lg:block">
         <NoteSidebar onCreateNote={handleCreateNote} />
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col lg:flex-row">
+      <div className="flex-1 flex flex-col lg:flex-row min-h-0">
         {/* Mobile Header */}
         <div className="lg:hidden border-b p-4 flex items-center gap-4">
           <Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
