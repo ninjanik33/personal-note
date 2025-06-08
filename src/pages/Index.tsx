@@ -225,7 +225,7 @@ const Index = () => {
           </div>
 
           <div className="flex-1 overflow-hidden">
-            <div className="h-full overflow-y-auto">
+            <div className="h-full overflow-y-auto custom-scrollbar">
               <div className="p-4">
                 <div className="lg:hidden mb-4 flex items-center justify-between">
                   <p className="text-sm text-muted-foreground">
