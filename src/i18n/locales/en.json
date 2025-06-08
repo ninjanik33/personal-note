@@ -1,0 +1,71 @@
+{
+  "app": {
+    "title": "Personal Notes",
+    "description": "Your personal note-taking app"
+  },
+  "sidebar": {
+    "categories": "Categories",
+    "search": "Search notes...",
+    "newCategory": "New Category",
+    "newSubcategory": "New Subcategory",
+    "allNotes": "All Notes"
+  },
+  "category": {
+    "create": "Create Category",
+    "edit": "Edit Category",
+    "delete": "Delete Category",
+    "name": "Category Name",
+    "color": "Color",
+    "confirmDelete": "Are you sure you want to delete this category? All subcategories and notes will be deleted.",
+    "noCategories": "No categories yet. Create your first category to get started!"
+  },
+  "subcategory": {
+    "create": "Create Subcategory",
+    "edit": "Edit Subcategory",
+    "delete": "Delete Subcategory",
+    "name": "Subcategory Name",
+    "confirmDelete": "Are you sure you want to delete this subcategory? All notes will be deleted.",
+    "noSubcategories": "No subcategories in this category"
+  },
+  "note": {
+    "create": "New Note",
+    "edit": "Edit Note",
+    "delete": "Delete Note",
+    "title": "Note Title",
+    "content": "Note Content",
+    "tags": "Tags",
+    "addTag": "Add Tag",
+    "images": "Images",
+    "uploadImage": "Upload Image",
+    "save": "Save Note",
+    "saved": "Note saved!",
+    "confirmDelete": "Are you sure you want to delete this note?",
+    "noNotes": "No notes in this subcategory. Create your first note!",
+    "lastModified": "Last modified",
+    "createdAt": "Created at"
+  },
+  "search": {
+    "noResults": "No notes found matching your search",
+    "searchInCategory": "Search in category",
+    "searchEverywhere": "Search everywhere",
+    "filterByTags": "Filter by tags"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "close": "Close",
+    "confirm": "Confirm",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success!"
+  },
+  "language": {
+    "switch": "Switch Language",
+    "english": "English",
+    "thai": "ไทย",
+    "chinese": "中文"
+  }
+}
