@@ -255,18 +255,18 @@ export const CategoryManager = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">{t("sidebar.categories")}</h3>
+      <div className="flex items-center justify-between flex-shrink-0">
+        <h3 className="text-base font-semibold">{t('sidebar.categories')}</h3>
         <Dialog open={showCategoryDialog} onOpenChange={setShowCategoryDialog}>
           <DialogTrigger asChild>
             <Button size="sm" className="gap-2">
               <Plus className="h-4 w-4" />
-              {t("sidebar.newCategory")}
+              {t('sidebar.newCategory')}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{t("category.create")}</DialogTitle>
+              <DialogTitle>{t('category.create')}</DialogTitle>
             </DialogHeader>
             <CategoryForm
               onSave={handleCreateCategory}
@@ -276,8 +276,15 @@ export const CategoryManager = () => {
         </Dialog>
       </div>
 
-      <div className="space-y-2">
-        {categories.map((category) => (
+      <div className="space-y-2 min-h-0">
+        {categories.length === 0 ? (
+          <div className="text-center py-4">
+            <p className="text-sm text-muted-foreground">
+              {t('category.noCategories')}
+            </p>
+          </div>
+        ) : (
+          categories.map((category) => (
           <div key={category.id} className="space-y-1">
             <div className="flex items-center justify-between p-2 rounded-lg border hover:bg-accent/50 group">
               <div className="flex items-center gap-2">
