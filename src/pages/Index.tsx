@@ -192,8 +192,8 @@ const Index = () => {
         </div>
 
         {/* Note List */}
-        <div className="w-full lg:w-96 border-r flex flex-col">
-          <div className="p-4 border-b hidden lg:block">
+        <div className="w-full lg:w-96 border-r flex flex-col min-h-0">
+          <div className="p-4 border-b hidden lg:block flex-shrink-0">
             <div className="flex items-center justify-between mb-2">
               <h2 className="font-semibold truncate">{getCurrentTitle()}</h2>
               <div className="flex gap-2">
@@ -224,25 +224,29 @@ const Index = () => {
             </p>
           </div>
 
-          <div className="flex-1 overflow-auto p-4">
-            <div className="lg:hidden mb-4 flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                {filteredNotes.length}{" "}
-                {filteredNotes.length === 1 ? "note" : "notes"}
-              </p>
-              {selectedSubcategoryId && (
-                <Button
-                  onClick={() => handleCreateNote(selectedSubcategoryId)}
-                  size="sm"
-                  variant="outline"
-                  className="gap-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  Quick Add
-                </Button>
-              )}
+          <div className="flex-1 overflow-hidden">
+            <div className="h-full overflow-y-auto">
+              <div className="p-4">
+                <div className="lg:hidden mb-4 flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    {filteredNotes.length}{" "}
+                    {filteredNotes.length === 1 ? "note" : "notes"}
+                  </p>
+                  {selectedSubcategoryId && (
+                    <Button
+                      onClick={() => handleCreateNote(selectedSubcategoryId)}
+                      size="sm"
+                      variant="outline"
+                      className="gap-2"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Quick Add
+                    </Button>
+                  )}
+                </div>
+                <NoteList notes={filteredNotes} onEditNote={handleEditNote} />
+              </div>
             </div>
-            <NoteList notes={filteredNotes} onEditNote={handleEditNote} />
           </div>
         </div>
 
