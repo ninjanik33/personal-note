@@ -49,8 +49,19 @@ export const useNoteStore = create<NoteStore>((set, get) => ({
   // Load data from localStorage
   loadData: () => {
     set({ isLoading: true });
-    const categories = storage.getCategories();
-    const notes = storage.getNotes();
+    let categories = storage.getCategories();
+    let notes = storage.getNotes();
+
+    // If no data exists, create sample data
+    if (categories.length === 0 && notes.length === 0) {
+      const { createSampleData } = require("@/lib/sampleData");
+      const sampleData = createSampleData();
+      categories = sampleData.categories;
+      notes = sampleData.notes;
+      storage.saveCategories(categories);
+      storage.saveNotes(notes);
+    }
+
     set({ categories, notes, isLoading: false });
   },
 
