@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Plus, FileText } from "lucide-react";
+import { Plus, FileText, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { toast } from "@/hooks/use-toast";
 import { NoteSidebar } from "@/components/NoteSidebar";
 import { NoteList } from "@/components/NoteList";
@@ -38,6 +39,7 @@ const Index = () => {
   const [creatingNoteForSubcategory, setCreatingNoteForSubcategory] = useState<
     string | null
   >(null);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   // Initialize data
   useEffect(() => {
@@ -97,6 +99,7 @@ const Index = () => {
   const handleCreateNote = (subcategoryId: string) => {
     setCreatingNoteForSubcategory(subcategoryId);
     setEditingNote(null);
+    setMobileSidebarOpen(false);
   };
 
   const handleEditNote = (note: Note) => {
@@ -151,16 +154,32 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex bg-background">
-      {/* Sidebar */}
+      {/* Desktop Sidebar */}
       <div className="w-80 flex-shrink-0 hidden lg:block">
         <NoteSidebar onCreateNote={handleCreateNote} />
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex">
+      <div className="flex-1 flex flex-col lg:flex-row">
+        {/* Mobile Header */}
+        <div className="lg:hidden border-b p-4 flex items-center gap-4">
+          <Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-2">
+                <Menu className="h-4 w-4" />
+                Menu
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-80 p-0">
+              <NoteSidebar onCreateNote={handleCreateNote} />
+            </SheetContent>
+          </Sheet>
+          <h1 className="font-semibold truncate">{getCurrentTitle()}</h1>
+        </div>
+
         {/* Note List */}
-        <div className="w-96 border-r flex flex-col">
-          <div className="p-4 border-b">
+        <div className="w-full lg:w-96 border-r flex flex-col">
+          <div className="p-4 border-b hidden lg:block">
             <div className="flex items-center justify-between mb-2">
               <h2 className="font-semibold truncate">{getCurrentTitle()}</h2>
               {selectedSubcategoryId && (
@@ -181,6 +200,22 @@ const Index = () => {
           </div>
 
           <div className="flex-1 overflow-auto p-4">
+            <div className="lg:hidden mb-4 flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                {filteredNotes.length}{" "}
+                {filteredNotes.length === 1 ? "note" : "notes"}
+              </p>
+              {selectedSubcategoryId && (
+                <Button
+                  onClick={() => handleCreateNote(selectedSubcategoryId)}
+                  size="sm"
+                  className="gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  {t("note.create")}
+                </Button>
+              )}
+            </div>
             <NoteList notes={filteredNotes} onEditNote={handleEditNote} />
           </div>
         </div>
@@ -227,11 +262,6 @@ const Index = () => {
             </Card>
           )}
         </div>
-      </div>
-
-      {/* Mobile Sidebar - TODO: Add mobile responsive behavior */}
-      <div className="lg:hidden">
-        {/* Mobile sidebar can be implemented with a drawer/sheet component */}
       </div>
     </div>
   );
