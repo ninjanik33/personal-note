@@ -161,4 +161,38 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+
+  /* Custom scrollbar styles */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground)) transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 3px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground) / 0.5);
+  }
+
+  /* Smooth scrolling for all elements */
+  * {
+    scroll-behavior: smooth;
+  }
+
+  /* Ensure proper flex layout for scrollable containers */
+  .scroll-container {
+    min-height: 0;
+    flex: 1;
+  }
 }
