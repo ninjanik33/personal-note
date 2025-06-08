@@ -1,11 +1,18 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Save, X, Tag, Plus } from "lucide-react";
+import { Save, X, Tag, Plus, FolderOpen, Folder } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { RichTextEditor } from "./RichTextEditor";
 import { ImageUpload } from "./ImageUpload";
@@ -27,24 +34,60 @@ export const NoteEditor = ({
   onCancel,
 }: NoteEditorProps) => {
   const { t } = useTranslation();
-  const { createNote, updateNote } = useNoteStore();
-  const { setSelectedNote } = useAppStore();
+  const { categories, createNote, updateNote } = useNoteStore();
+  const { setSelectedNote, setSelectedCategory, setSelectedSubcategory } =
+    useAppStore();
 
   const [title, setTitle] = useState(note?.title || "");
   const [content, setContent] = useState(note?.content || "");
   const [tags, setTags] = useState<string[]>(note?.tags || []);
   const [images, setImages] = useState<string[]>(note?.images || []);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
+  const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string>(
+    subcategoryId || "",
+  );
   const [newTag, setNewTag] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
+  // Initialize category and subcategory selection
   useEffect(() => {
     if (note) {
       setTitle(note.title);
       setContent(note.content);
       setTags(note.tags);
       setImages(note.images);
+
+      // Find the category that contains this note's subcategory
+      const category = categories.find((cat) =>
+        cat.subcategories.some((sub) => sub.id === note.subcategoryId),
+      );
+      if (category) {
+        setSelectedCategoryId(category.id);
+        setSelectedSubcategoryId(note.subcategoryId);
+      }
+    } else if (subcategoryId) {
+      // If creating a new note with a specific subcategory
+      const category = categories.find((cat) =>
+        cat.subcategories.some((sub) => sub.id === subcategoryId),
+      );
+      if (category) {
+        setSelectedCategoryId(category.id);
+        setSelectedSubcategoryId(subcategoryId);
+      }
     }
-  }, [note]);
+  }, [note, subcategoryId, categories]);
+
+  // Get available subcategories for selected category
+  const availableSubcategories = selectedCategoryId
+    ? categories.find((cat) => cat.id === selectedCategoryId)?.subcategories ||
+      []
+    : [];
+
+  // Reset subcategory when category changes
+  const handleCategoryChange = (categoryId: string) => {
+    setSelectedCategoryId(categoryId);
+    setSelectedSubcategoryId(""); // Reset subcategory selection
+  };
 
   const handleAddTag = () => {
     if (newTag.trim() && !tags.includes(newTag.trim())) {
@@ -67,10 +110,10 @@ export const NoteEditor = ({
       return;
     }
 
-    if (!subcategoryId && !note) {
+    if (!selectedSubcategoryId) {
       toast({
         title: t("common.error"),
-        description: "Please select a subcategory",
+        description: "Please select a category and subcategory",
         variant: "destructive",
       });
       return;
@@ -92,12 +135,12 @@ export const NoteEditor = ({
           title: t("common.success"),
           description: t("note.saved"),
         });
-      } else if (subcategoryId) {
+      } else {
         // Create new note
         const newNote = createNote({
           title: title.trim(),
           content,
-          subcategoryId,
+          subcategoryId: selectedSubcategoryId,
           tags,
         });
 
@@ -106,7 +149,10 @@ export const NoteEditor = ({
           updateNote(newNote.id, { images });
         }
 
+        // Update app state to show the new note
         setSelectedNote(newNote.id);
+        setSelectedCategory(selectedCategoryId);
+        setSelectedSubcategory(selectedSubcategoryId);
 
         toast({
           title: t("common.success"),
@@ -134,6 +180,13 @@ export const NoteEditor = ({
     }
   };
 
+  const selectedCategory = categories.find(
+    (cat) => cat.id === selectedCategoryId,
+  );
+  const selectedSubcategory = availableSubcategories.find(
+    (sub) => sub.id === selectedSubcategoryId,
+  );
+
   return (
     <Card className="h-full flex flex-col">
       <CardHeader className="flex-shrink-0">
@@ -142,7 +195,7 @@ export const NoteEditor = ({
           <div className="flex gap-2">
             <Button
               onClick={handleSave}
-              disabled={isSaving || !title.trim()}
+              disabled={isSaving || !title.trim() || !selectedSubcategoryId}
               size="sm"
               className="gap-2"
             >
@@ -163,6 +216,113 @@ export const NoteEditor = ({
       </CardHeader>
 
       <CardContent className="flex-1 overflow-auto space-y-4">
+        {/* Category and Subcategory Selection */}
+        {!note && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="category-select">{t("category.name")}</Label>
+              <Select
+                value={selectedCategoryId}
+                onValueChange={handleCategoryChange}
+              >
+                <SelectTrigger id="category-select">
+                  <SelectValue placeholder="Select a category">
+                    {selectedCategory && (
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: selectedCategory.color }}
+                        />
+                        <Folder className="h-4 w-4" />
+                        <span>{selectedCategory.name}</span>
+                      </div>
+                    )}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.length === 0 ? (
+                    <SelectItem value="" disabled>
+                      No categories available
+                    </SelectItem>
+                  ) : (
+                    categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: category.color }}
+                          />
+                          <Folder className="h-4 w-4" />
+                          <span>{category.name}</span>
+                        </div>
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="subcategory-select">
+                {t("subcategory.name")}
+              </Label>
+              <Select
+                value={selectedSubcategoryId}
+                onValueChange={setSelectedSubcategoryId}
+                disabled={!selectedCategoryId}
+              >
+                <SelectTrigger id="subcategory-select">
+                  <SelectValue placeholder="Select a subcategory">
+                    {selectedSubcategory && (
+                      <div className="flex items-center gap-2">
+                        <FolderOpen className="h-4 w-4" />
+                        <span>{selectedSubcategory.name}</span>
+                      </div>
+                    )}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {availableSubcategories.length === 0 ? (
+                    <SelectItem value="" disabled>
+                      {selectedCategoryId
+                        ? "No subcategories available"
+                        : "Select a category first"}
+                    </SelectItem>
+                  ) : (
+                    availableSubcategories.map((subcategory) => (
+                      <SelectItem key={subcategory.id} value={subcategory.id}>
+                        <div className="flex items-center gap-2">
+                          <FolderOpen className="h-4 w-4" />
+                          <span>{subcategory.name}</span>
+                        </div>
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
+
+        {/* Show current category/subcategory for existing notes */}
+        {note && selectedCategory && selectedSubcategory && (
+          <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
+            <div className="flex items-center gap-2">
+              <div
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: selectedCategory.color }}
+              />
+              <Folder className="h-4 w-4" />
+              <span className="font-medium">{selectedCategory.name}</span>
+            </div>
+            <span className="text-muted-foreground">→</span>
+            <div className="flex items-center gap-2">
+              <FolderOpen className="h-4 w-4" />
+              <span>{selectedSubcategory.name}</span>
+            </div>
+          </div>
+        )}
+
         <div className="space-y-2">
           <Label htmlFor="note-title">{t("note.title")}</Label>
           <Input
