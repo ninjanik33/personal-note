@@ -13,12 +13,10 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { SearchBar } from "./SearchBar";
 import { CategoryManager } from "./CategoryManager";
 import { LanguageSwitcher } from "./LanguageSwitcher";
@@ -204,27 +202,34 @@ export const NoteSidebar = ({ onCreateNote }: NoteSidebarProps) => {
         </div>
       </ScrollArea>
 
-      {/* Footer */}
-      <div className="p-4 border-t">
-        <Dialog
+      {/* Category Management Section - Always Visible */}
+      <div className="border-t">
+        <Collapsible
           open={showCategoryManager}
           onOpenChange={setShowCategoryManager}
         >
-          <DialogTrigger asChild>
-            <Button variant="outline" className="w-full gap-2">
-              <Settings className="h-4 w-4" />
-              Manage Categories
+          <CollapsibleTrigger asChild>
+            <Button
+              variant="ghost"
+              className="w-full justify-between p-4 h-auto"
+            >
+              <div className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                <span>Manage Categories</span>
+              </div>
+              {showCategoryManager ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
             </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden">
-            <DialogHeader>
-              <DialogTitle>Category Management</DialogTitle>
-            </DialogHeader>
-            <div className="overflow-auto">
+          </CollapsibleTrigger>
+          <CollapsibleContent className="border-t bg-muted/20">
+            <div className="p-4">
               <CategoryManager />
             </div>
-          </DialogContent>
-        </Dialog>
+          </CollapsibleContent>
+        </Collapsible>
       </div>
     </div>
   );

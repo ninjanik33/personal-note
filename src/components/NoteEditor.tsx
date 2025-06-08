@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Save, X, Tag, Plus, FolderOpen, Folder } from "lucide-react";
+import {
+  Save,
+  X,
+  Tag,
+  Plus,
+  FolderOpen,
+  Folder,
+  FolderPlus,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +21,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { RichTextEditor } from "./RichTextEditor";
 import { ImageUpload } from "./ImageUpload";
@@ -27,6 +42,29 @@ interface NoteEditorProps {
   onCancel?: () => void;
 }
 
+const predefinedColors = [
+  "#ef4444",
+  "#f97316",
+  "#f59e0b",
+  "#eab308",
+  "#84cc16",
+  "#22c55e",
+  "#10b981",
+  "#14b8a6",
+  "#06b6d4",
+  "#0ea5e9",
+  "#3b82f6",
+  "#6366f1",
+  "#8b5cf6",
+  "#a855f7",
+  "#d946ef",
+  "#ec4899",
+  "#f43f5e",
+  "#64748b",
+  "#6b7280",
+  "#374151",
+];
+
 export const NoteEditor = ({
   note,
   subcategoryId,
@@ -34,7 +72,13 @@ export const NoteEditor = ({
   onCancel,
 }: NoteEditorProps) => {
   const { t } = useTranslation();
-  const { categories, createNote, updateNote } = useNoteStore();
+  const {
+    categories,
+    createNote,
+    updateNote,
+    createCategory,
+    createSubcategory,
+  } = useNoteStore();
   const { setSelectedNote, setSelectedCategory, setSelectedSubcategory } =
     useAppStore();
 
@@ -48,6 +92,14 @@ export const NoteEditor = ({
   );
   const [newTag, setNewTag] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+
+  // New category/subcategory creation state
+  const [showNewCategoryDialog, setShowNewCategoryDialog] = useState(false);
+  const [showNewSubcategoryDialog, setShowNewSubcategoryDialog] =
+    useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [newCategoryColor, setNewCategoryColor] = useState(predefinedColors[0]);
+  const [newSubcategoryName, setNewSubcategoryName] = useState("");
 
   // Initialize category and subcategory selection
   useEffect(() => {
@@ -87,6 +139,59 @@ export const NoteEditor = ({
   const handleCategoryChange = (categoryId: string) => {
     setSelectedCategoryId(categoryId);
     setSelectedSubcategoryId(""); // Reset subcategory selection
+  };
+
+  const handleCreateNewCategory = () => {
+    if (!newCategoryName.trim()) {
+      toast({
+        title: t("common.error"),
+        description: "Category name is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    createCategory({ name: newCategoryName.trim(), color: newCategoryColor });
+    setNewCategoryName("");
+    setNewCategoryColor(predefinedColors[0]);
+    setShowNewCategoryDialog(false);
+
+    toast({
+      title: t("common.success"),
+      description: "Category created successfully",
+    });
+  };
+
+  const handleCreateNewSubcategory = () => {
+    if (!newSubcategoryName.trim()) {
+      toast({
+        title: t("common.error"),
+        description: "Subcategory name is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!selectedCategoryId) {
+      toast({
+        title: t("common.error"),
+        description: "Please select a category first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    createSubcategory({
+      name: newSubcategoryName.trim(),
+      categoryId: selectedCategoryId,
+    });
+    setNewSubcategoryName("");
+    setShowNewSubcategoryDialog(false);
+
+    toast({
+      title: t("common.success"),
+      description: "Subcategory created successfully",
+    });
   };
 
   const handleAddTag = () => {
@@ -221,85 +326,198 @@ export const NoteEditor = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="category-select">{t("category.name")}</Label>
-              <Select
-                value={selectedCategoryId}
-                onValueChange={handleCategoryChange}
-              >
-                <SelectTrigger id="category-select">
-                  <SelectValue placeholder="Select a category">
-                    {selectedCategory && (
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: selectedCategory.color }}
-                        />
-                        <Folder className="h-4 w-4" />
-                        <span>{selectedCategory.name}</span>
-                      </div>
-                    )}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.length === 0 ? (
-                    <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                      No categories available
-                    </div>
-                  ) : (
-                    categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
+              <div className="flex gap-2">
+                <Select
+                  value={selectedCategoryId}
+                  onValueChange={handleCategoryChange}
+                >
+                  <SelectTrigger id="category-select" className="flex-1">
+                    <SelectValue placeholder="Select a category">
+                      {selectedCategory && (
                         <div className="flex items-center gap-2">
                           <div
                             className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: category.color }}
+                            style={{ backgroundColor: selectedCategory.color }}
                           />
                           <Folder className="h-4 w-4" />
-                          <span>{category.name}</span>
+                          <span>{selectedCategory.name}</span>
                         </div>
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
+                      )}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.length === 0 ? (
+                      <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                        No categories available
+                      </div>
+                    ) : (
+                      categories.map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="w-3 h-3 rounded-full"
+                              style={{ backgroundColor: category.color }}
+                            />
+                            <Folder className="h-4 w-4" />
+                            <span>{category.name}</span>
+                          </div>
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+
+                {/* Add New Category Button */}
+                <Dialog
+                  open={showNewCategoryDialog}
+                  onOpenChange={setShowNewCategoryDialog}
+                >
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-1">
+                      <Plus className="h-3 w-3" />
+                      <span className="sr-only">Add category</span>
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>{t("category.create")}</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="new-category-name">
+                          {t("category.name")}
+                        </Label>
+                        <Input
+                          id="new-category-name"
+                          value={newCategoryName}
+                          onChange={(e) => setNewCategoryName(e.target.value)}
+                          placeholder={t("category.name")}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>{t("category.color")}</Label>
+                        <div className="grid grid-cols-10 gap-2">
+                          {predefinedColors.map((colorOption) => (
+                            <button
+                              key={colorOption}
+                              type="button"
+                              className={`w-6 h-6 rounded-full border-2 ${
+                                newCategoryColor === colorOption
+                                  ? "border-gray-900"
+                                  : "border-gray-300"
+                              }`}
+                              style={{ backgroundColor: colorOption }}
+                              onClick={() => setNewCategoryColor(colorOption)}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => setShowNewCategoryDialog(false)}
+                        >
+                          {t("common.cancel")}
+                        </Button>
+                        <Button onClick={handleCreateNewCategory}>
+                          {t("common.create")}
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="subcategory-select">
                 {t("subcategory.name")}
               </Label>
-              <Select
-                value={selectedSubcategoryId}
-                onValueChange={setSelectedSubcategoryId}
-                disabled={!selectedCategoryId}
-              >
-                <SelectTrigger id="subcategory-select">
-                  <SelectValue placeholder="Select a subcategory">
-                    {selectedSubcategory && (
-                      <div className="flex items-center gap-2">
-                        <FolderOpen className="h-4 w-4" />
-                        <span>{selectedSubcategory.name}</span>
-                      </div>
-                    )}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {availableSubcategories.length === 0 ? (
-                    <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                      {selectedCategoryId
-                        ? "No subcategories available"
-                        : "Select a category first"}
-                    </div>
-                  ) : (
-                    availableSubcategories.map((subcategory) => (
-                      <SelectItem key={subcategory.id} value={subcategory.id}>
+              <div className="flex gap-2">
+                <Select
+                  value={selectedSubcategoryId}
+                  onValueChange={setSelectedSubcategoryId}
+                  disabled={!selectedCategoryId}
+                >
+                  <SelectTrigger id="subcategory-select" className="flex-1">
+                    <SelectValue placeholder="Select a subcategory">
+                      {selectedSubcategory && (
                         <div className="flex items-center gap-2">
                           <FolderOpen className="h-4 w-4" />
-                          <span>{subcategory.name}</span>
+                          <span>{selectedSubcategory.name}</span>
                         </div>
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
+                      )}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableSubcategories.length === 0 ? (
+                      <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                        {selectedCategoryId
+                          ? "No subcategories available"
+                          : "Select a category first"}
+                      </div>
+                    ) : (
+                      availableSubcategories.map((subcategory) => (
+                        <SelectItem key={subcategory.id} value={subcategory.id}>
+                          <div className="flex items-center gap-2">
+                            <FolderOpen className="h-4 w-4" />
+                            <span>{subcategory.name}</span>
+                          </div>
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+
+                {/* Add New Subcategory Button */}
+                <Dialog
+                  open={showNewSubcategoryDialog}
+                  onOpenChange={setShowNewSubcategoryDialog}
+                >
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1"
+                      disabled={!selectedCategoryId}
+                    >
+                      <Plus className="h-3 w-3" />
+                      <span className="sr-only">Add subcategory</span>
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>{t("subcategory.create")}</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="new-subcategory-name">
+                          {t("subcategory.name")}
+                        </Label>
+                        <Input
+                          id="new-subcategory-name"
+                          value={newSubcategoryName}
+                          onChange={(e) =>
+                            setNewSubcategoryName(e.target.value)
+                          }
+                          placeholder={t("subcategory.name")}
+                        />
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => setShowNewSubcategoryDialog(false)}
+                        >
+                          {t("common.cancel")}
+                        </Button>
+                        <Button onClick={handleCreateNewSubcategory}>
+                          {t("common.create")}
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
             </div>
           </div>
         )}
