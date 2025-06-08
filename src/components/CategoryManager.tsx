@@ -21,6 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "@/hooks/use-toast";
 import { useNoteStore } from "@/store/noteStore";
 import { useAppStore } from "@/store/appStore";
@@ -254,19 +255,20 @@ export const CategoryManager = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 h-full flex flex-col">
+      {/* Header */}
       <div className="flex items-center justify-between flex-shrink-0">
-        <h3 className="text-base font-semibold">{t('sidebar.categories')}</h3>
+        <h3 className="text-base font-semibold">{t("sidebar.categories")}</h3>
         <Dialog open={showCategoryDialog} onOpenChange={setShowCategoryDialog}>
           <DialogTrigger asChild>
             <Button size="sm" className="gap-2">
               <Plus className="h-4 w-4" />
-              {t('sidebar.newCategory')}
+              {t("sidebar.newCategory")}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{t('category.create')}</DialogTitle>
+              <DialogTitle>{t("category.create")}</DialogTitle>
             </DialogHeader>
             <CategoryForm
               onSave={handleCreateCategory}
@@ -276,86 +278,94 @@ export const CategoryManager = () => {
         </Dialog>
       </div>
 
-      <div className="space-y-2 min-h-0">
-        {categories.length === 0 ? (
-          <div className="text-center py-4">
-            <p className="text-sm text-muted-foreground">
-              {t('category.noCategories')}
-            </p>
-          </div>
-        ) : (
-          categories.map((category) => (
-          <div key={category.id} className="space-y-1">
-            <div className="flex items-center justify-between p-2 rounded-lg border hover:bg-accent/50 group">
-              <div className="flex items-center gap-2">
-                <div
-                  className="w-4 h-4 rounded-full"
-                  style={{ backgroundColor: category.color }}
-                />
-                <span className="font-medium">{category.name}</span>
-                <span className="text-sm text-muted-foreground">
-                  ({category.subcategories.length})
-                </span>
+      {/* Scrollable Content */}
+      <div className="flex-1 min-h-0">
+        <ScrollArea className="h-full">
+          <div className="space-y-2 pr-2">
+            {categories.length === 0 ? (
+              <div className="text-center py-4">
+                <p className="text-sm text-muted-foreground">
+                  {t("category.noCategories")}
+                </p>
               </div>
+            ) : (
+              categories.map((category) => (
+                <div key={category.id} className="space-y-1">
+                  <div className="flex items-center justify-between p-2 rounded-lg border hover:bg-accent/50 group">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-4 h-4 rounded-full"
+                        style={{ backgroundColor: category.color }}
+                      />
+                      <span className="font-medium text-sm">
+                        {category.name}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        ({category.subcategories.length})
+                      </span>
+                    </div>
 
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-6 w-6 p-0"
-                  onClick={() => openSubcategoryDialog(category.id)}
-                >
-                  <FolderPlus className="h-3 w-3" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-6 w-6 p-0"
-                  onClick={() => setEditingCategory(category)}
-                >
-                  <Edit className="h-3 w-3" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-6 w-6 p-0 text-destructive hover:text-destructive"
-                  onClick={() => setDeletingCategory(category)}
-                >
-                  <Trash2 className="h-3 w-3" />
-                </Button>
-              </div>
-            </div>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-6 w-6 p-0"
+                        onClick={() => openSubcategoryDialog(category.id)}
+                      >
+                        <FolderPlus className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-6 w-6 p-0"
+                        onClick={() => setEditingCategory(category)}
+                      >
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                        onClick={() => setDeletingCategory(category)}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
 
-            {/* Subcategories */}
-            {category.subcategories.map((subcategory) => (
-              <div
-                key={subcategory.id}
-                className="ml-6 flex items-center justify-between p-2 rounded-lg border hover:bg-accent/50 group"
-              >
-                <span className="text-sm">{subcategory.name}</span>
+                  {/* Subcategories */}
+                  {category.subcategories.map((subcategory) => (
+                    <div
+                      key={subcategory.id}
+                      className="ml-6 flex items-center justify-between p-2 rounded-lg border hover:bg-accent/50 group"
+                    >
+                      <span className="text-sm">{subcategory.name}</span>
 
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-6 w-6 p-0"
-                    onClick={() => setEditingSubcategory(subcategory)}
-                  >
-                    <Edit className="h-3 w-3" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-6 w-6 p-0 text-destructive hover:text-destructive"
-                    onClick={() => setDeletingSubcategory(subcategory)}
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-6 w-6 p-0"
+                          onClick={() => setEditingSubcategory(subcategory)}
+                        >
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                          onClick={() => setDeletingSubcategory(subcategory)}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
-        ))}
+        </ScrollArea>
       </div>
 
       {/* Edit Category Dialog */}
