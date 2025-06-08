@@ -203,7 +203,7 @@ export const NoteSidebar = ({ onCreateNote }: NoteSidebarProps) => {
       </ScrollArea>
 
       {/* Category Management Section - Always Visible */}
-      <div className="border-t">
+      <div className="border-t flex-shrink-0">
         <Collapsible
           open={showCategoryManager}
           onOpenChange={setShowCategoryManager}
@@ -225,7 +225,7 @@ export const NoteSidebar = ({ onCreateNote }: NoteSidebarProps) => {
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="border-t bg-muted/20">
-            <div className="p-4">
+            <div className="p-4 max-h-80 overflow-y-auto custom-scrollbar">
               <CategoryManager />
             </div>
           </CollapsibleContent>
