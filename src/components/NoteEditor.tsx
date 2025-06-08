@@ -241,9 +241,9 @@ export const NoteEditor = ({
                 </SelectTrigger>
                 <SelectContent>
                   {categories.length === 0 ? (
-                    <SelectItem value="" disabled>
+                    <div className="px-2 py-1.5 text-sm text-muted-foreground">
                       No categories available
-                    </SelectItem>
+                    </div>
                   ) : (
                     categories.map((category) => (
                       <SelectItem key={category.id} value={category.id}>
@@ -283,11 +283,11 @@ export const NoteEditor = ({
                 </SelectTrigger>
                 <SelectContent>
                   {availableSubcategories.length === 0 ? (
-                    <SelectItem value="" disabled>
+                    <div className="px-2 py-1.5 text-sm text-muted-foreground">
                       {selectedCategoryId
                         ? "No subcategories available"
                         : "Select a category first"}
-                    </SelectItem>
+                    </div>
                   ) : (
                     availableSubcategories.map((subcategory) => (
                       <SelectItem key={subcategory.id} value={subcategory.id}>
