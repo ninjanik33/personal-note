@@ -12,10 +12,13 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { EnvironmentStatus } from "@/components/EnvironmentStatus";
 import { useAuthStore } from "@/store/authStore";
+import { isSupabaseAvailable } from "@/lib/supabase";
 
 const PendingApproval = () => {
   const { logout } = useAuthStore();
+  const isDemo = !isSupabaseAvailable();
 
   useEffect(() => {
     // Automatically logout user since they can't use the app yet
@@ -51,6 +54,9 @@ const PendingApproval = () => {
           </CardHeader>
 
           <CardContent className="space-y-6">
+            {/* Environment Status */}
+            <EnvironmentStatus showInRegistration={true} />
+
             {/* Status Badge */}
             <div className="flex justify-center">
               <Badge variant="secondary" className="gap-2">
@@ -108,6 +114,30 @@ const PendingApproval = () => {
                   </div>
                 </div>
               </div>
+
+              {isDemo && (
+                <div className="p-4 rounded-lg border bg-blue-50 dark:bg-blue-950/20">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
+                    <div>
+                      <h3 className="font-medium text-blue-900 dark:text-blue-100">
+                        Demo Mode Instructions
+                      </h3>
+                      <p className="text-sm text-blue-800 dark:text-blue-200 mt-1 mb-2">
+                        Since you're in demo mode, you can manually approve your
+                        account using the browser console:
+                      </p>
+                      <div className="bg-blue-100 dark:bg-blue-900/40 p-2 rounded text-xs font-mono text-blue-900 dark:text-blue-100">
+                        userAdmin.approve('your_username')
+                      </div>
+                      <p className="text-sm text-blue-800 dark:text-blue-200 mt-2">
+                        Open Developer Tools (F12), go to Console, and run the
+                        command above with your username.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Additional Information */}
