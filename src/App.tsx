@@ -5,7 +5,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
+import Register from "./pages/Register";
+import PendingApproval from "./pages/PendingApproval";
 import NotFound from "./pages/NotFound";
+// Import user admin utilities for demo mode
+import "@/lib/localStorageUserUtils";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +28,8 @@ const App = () => (
               </ProtectedRoute>
             }
           />
+          <Route path="/register" element={<Register />} />
+          <Route path="/pending-approval" element={<PendingApproval />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route
             path="*"
