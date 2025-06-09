@@ -12,8 +12,11 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNoteStore } from "@/store/noteStore";
 import { isSupabaseAvailable } from "@/lib/supabase";
+import { SupabaseConnectionTester } from "./SupabaseConnectionTester";
+import { DatabaseSetupGuide } from "./DatabaseSetupGuide";
 import { toast } from "@/hooks/use-toast";
 
 type DataSourceMode = "localStorage" | "supabase" | "customAPI";
@@ -142,127 +145,161 @@ export const DatabaseModeSelector = () => {
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="space-y-6">
-        <RadioGroup
-          value={selectedMode}
-          onValueChange={(value) => handleModeChange(value as DataSourceMode)}
-        >
-          {/* Local Storage Option */}
-          <div className="flex items-center space-x-2 p-4 border rounded-lg">
-            <RadioGroupItem value="localStorage" id="localStorage" />
-            <div className="flex-1">
-              <Label
-                htmlFor="localStorage"
-                className="flex items-center gap-2 cursor-pointer"
+      <CardContent>
+        <Tabs defaultValue="configuration" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="configuration">Configuration</TabsTrigger>
+            <TabsTrigger value="setup-guide">Setup Guide</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="configuration" className="space-y-6 mt-6">
+            <RadioGroup
+              value={selectedMode}
+              onValueChange={(value) =>
+                handleModeChange(value as DataSourceMode)
+              }
+            >
+              {/* Local Storage Option */}
+              <div className="flex items-center space-x-2 p-4 border rounded-lg">
+                <RadioGroupItem value="localStorage" id="localStorage" />
+                <div className="flex-1">
+                  <Label
+                    htmlFor="localStorage"
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <HardDrive className="h-4 w-4 text-green-500" />
+                    Local Storage
+                    <Badge variant="secondary" className="text-xs">
+                      Always Available
+                    </Badge>
+                  </Label>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Store data locally in your browser. Works offline but not
+                    synced across devices.
+                  </p>
+                </div>
+              </div>
+
+              {/* Supabase Option */}
+              <div className="flex items-center space-x-2 p-4 border rounded-lg">
+                <RadioGroupItem
+                  value="supabase"
+                  id="supabase"
+                  disabled={!isAvailable("supabase")}
+                />
+                <div className="flex-1">
+                  <Label
+                    htmlFor="supabase"
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <Cloud className="h-4 w-4 text-blue-500" />
+                    Supabase
+                    <Badge
+                      variant={
+                        isAvailable("supabase") ? "default" : "destructive"
+                      }
+                      className="text-xs"
+                    >
+                      {isAvailable("supabase")
+                        ? "Configured"
+                        : "Not Configured"}
+                    </Badge>
+                  </Label>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    PostgreSQL database with real-time sync. Requires Supabase
+                    credentials.
+                  </p>
+                  {!isAvailable("supabase") && (
+                    <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+                      Configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Custom API Option */}
+              <div className="flex items-center space-x-2 p-4 border rounded-lg">
+                <RadioGroupItem
+                  value="customAPI"
+                  id="customAPI"
+                  disabled={!isAvailable("customAPI")}
+                />
+                <div className="flex-1">
+                  <Label
+                    htmlFor="customAPI"
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <Server className="h-4 w-4 text-purple-500" />
+                    Custom API
+                    <Badge
+                      variant={
+                        isAvailable("customAPI") ? "default" : "destructive"
+                      }
+                      className="text-xs"
+                    >
+                      {isAvailable("customAPI")
+                        ? "Configured"
+                        : "Not Configured"}
+                    </Badge>
+                  </Label>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Your custom PostgreSQL backend API. Full control over your
+                    data.
+                  </p>
+                  {!isAvailable("customAPI") && (
+                    <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+                      Configure VITE_API_BASE_URL
+                    </p>
+                  )}
+                </div>
+              </div>
+            </RadioGroup>
+
+            {/* Current Status */}
+            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium">Current Mode:</span>
+                {getDataSourceIcon(selectedMode)}
+                <span className="text-sm">
+                  {getDataSourceName(selectedMode)}
+                </span>
+              </div>
+
+              <Button
+                onClick={handleRefresh}
+                disabled={isLoading}
+                variant="outline"
+                size="sm"
+                className="gap-2"
               >
-                <HardDrive className="h-4 w-4 text-green-500" />
-                Local Storage
-                <Badge variant="secondary" className="text-xs">
-                  Always Available
-                </Badge>
-              </Label>
-              <p className="text-sm text-muted-foreground mt-1">
-                Store data locally in your browser. Works offline but not synced
-                across devices.
-              </p>
+                <RefreshCw
+                  className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+                />
+                Refresh
+              </Button>
             </div>
-          </div>
 
-          {/* Supabase Option */}
-          <div className="flex items-center space-x-2 p-4 border rounded-lg">
-            <RadioGroupItem
-              value="supabase"
-              id="supabase"
-              disabled={!isAvailable("supabase")}
-            />
-            <div className="flex-1">
-              <Label
-                htmlFor="supabase"
-                className="flex items-center gap-2 cursor-pointer"
-              >
-                <Cloud className="h-4 w-4 text-blue-500" />
-                Supabase
-                <Badge
-                  variant={isAvailable("supabase") ? "default" : "destructive"}
-                  className="text-xs"
-                >
-                  {isAvailable("supabase") ? "Configured" : "Not Configured"}
-                </Badge>
-              </Label>
-              <p className="text-sm text-muted-foreground mt-1">
-                PostgreSQL database with real-time sync. Requires Supabase
-                credentials.
-              </p>
-              {!isAvailable("supabase") && (
-                <p className="text-xs text-red-600 dark:text-red-400 mt-1">
-                  Configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
-                </p>
-              )}
+            {/* Supabase Connection Tester */}
+            {selectedMode === "supabase" && isAvailable("supabase") && (
+              <div className="pt-4 border-t">
+                <SupabaseConnectionTester />
+              </div>
+            )}
+
+            {/* Configuration Help */}
+            <div className="text-xs text-muted-foreground p-3 bg-muted/30 rounded border">
+              <strong>Environment Variables:</strong>
+              <br />• <code>VITE_SUPABASE_URL</code> - Your Supabase project URL
+              <br />• <code>VITE_SUPABASE_ANON_KEY</code> - Your Supabase anon
+              key
+              <br />• <code>VITE_API_BASE_URL</code> - Your custom API base URL
             </div>
-          </div>
+          </TabsContent>
 
-          {/* Custom API Option */}
-          <div className="flex items-center space-x-2 p-4 border rounded-lg">
-            <RadioGroupItem
-              value="customAPI"
-              id="customAPI"
-              disabled={!isAvailable("customAPI")}
-            />
-            <div className="flex-1">
-              <Label
-                htmlFor="customAPI"
-                className="flex items-center gap-2 cursor-pointer"
-              >
-                <Server className="h-4 w-4 text-purple-500" />
-                Custom API
-                <Badge
-                  variant={isAvailable("customAPI") ? "default" : "destructive"}
-                  className="text-xs"
-                >
-                  {isAvailable("customAPI") ? "Configured" : "Not Configured"}
-                </Badge>
-              </Label>
-              <p className="text-sm text-muted-foreground mt-1">
-                Your custom PostgreSQL backend API. Full control over your data.
-              </p>
-              {!isAvailable("customAPI") && (
-                <p className="text-xs text-red-600 dark:text-red-400 mt-1">
-                  Configure VITE_API_BASE_URL
-                </p>
-              )}
-            </div>
-          </div>
-        </RadioGroup>
-
-        {/* Current Status */}
-        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">Current Mode:</span>
-            {getDataSourceIcon(selectedMode)}
-            <span className="text-sm">{getDataSourceName(selectedMode)}</span>
-          </div>
-
-          <Button
-            onClick={handleRefresh}
-            disabled={isLoading}
-            variant="outline"
-            size="sm"
-            className="gap-2"
-          >
-            <RefreshCw
-              className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
-            />
-            Refresh
-          </Button>
-        </div>
-
-        {/* Configuration Help */}
-        <div className="text-xs text-muted-foreground p-3 bg-muted/30 rounded border">
-          <strong>Environment Variables:</strong>
-          <br />• <code>VITE_SUPABASE_URL</code> - Your Supabase project URL
-          <br />• <code>VITE_SUPABASE_ANON_KEY</code> - Your Supabase anon key
-          <br />• <code>VITE_API_BASE_URL</code> - Your custom API base URL
-        </div>
+          <TabsContent value="setup-guide" className="mt-6">
+            <DatabaseSetupGuide />
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );
