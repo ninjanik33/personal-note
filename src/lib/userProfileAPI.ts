@@ -55,10 +55,87 @@ export const userProfileAPI = {
   async registerUser(
     data: UserRegistrationData,
   ): Promise<{ user: any; profile: UserProfile }> {
+    // If Supabase is not configured, use localStorage fallback
     if (!isSupabaseAvailable() || !supabase) {
-      throw new Error(
-        "Supabase is not configured. Please check your environment variables.",
-      );
+      try {
+        // Create user in localStorage
+        const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const now = new Date().toISOString();
+
+        const user = {
+          id: userId,
+          email: data.email,
+          username: data.username,
+          created_at: now,
+        };
+
+        const profile: UserProfile = {
+          id: `profile_${userId}`,
+          user_id: userId,
+          username: data.username,
+          email: data.email,
+          first_name: data.first_name || "",
+          last_name: data.last_name || "",
+          display_name:
+            data.first_name && data.last_name
+              ? `${data.first_name} ${data.last_name}`
+              : data.username,
+          account_status: "pending" as const,
+          date_of_birth: undefined,
+          phone_number: undefined,
+          gender: undefined,
+          country: undefined,
+          state_province: undefined,
+          city: undefined,
+          postal_code: undefined,
+          timezone: "UTC",
+          occupation: undefined,
+          company: undefined,
+          website: undefined,
+          bio: undefined,
+          language_preference: "en" as const,
+          theme_preference: "system" as const,
+          notification_preferences: {
+            email: true,
+            push: false,
+            marketing: data.marketing_consent || false,
+          },
+          profile_visibility: "private" as const,
+          two_factor_enabled: false,
+          email_verified: false,
+          phone_verified: false,
+          avatar_url: undefined,
+          cover_image_url: undefined,
+          subscription_plan: "free" as const,
+          subscription_expires_at: undefined,
+          storage_used_bytes: 0,
+          notes_count: 0,
+          created_at: now,
+          updated_at: now,
+          last_active_at: now,
+        };
+
+        // Store in localStorage
+        const existingUsers = JSON.parse(
+          localStorage.getItem("noteapp_users") || "[]",
+        );
+        existingUsers.push({ ...user, password: data.password });
+        localStorage.setItem("noteapp_users", JSON.stringify(existingUsers));
+
+        const existingProfiles = JSON.parse(
+          localStorage.getItem("noteapp_user_profiles") || "[]",
+        );
+        existingProfiles.push(profile);
+        localStorage.setItem(
+          "noteapp_user_profiles",
+          JSON.stringify(existingProfiles),
+        );
+
+        return { user, profile };
+      } catch (error) {
+        console.error("Error registering user in localStorage:", error);
+        throw new Error("Registration failed. Please try again.");
+      }
     }
 
     try {
@@ -256,10 +333,22 @@ export const userProfileAPI = {
 
   // Check username availability
   async checkUsernameAvailability(username: string): Promise<boolean> {
+    // If Supabase is not configured, use localStorage fallback
     if (!isSupabaseAvailable() || !supabase) {
-      throw new Error(
-        "Supabase is not configured. Please check your environment variables.",
-      );
+      try {
+        // Check against localStorage stored users
+        const existingUsers = JSON.parse(
+          localStorage.getItem("noteapp_users") || "[]",
+        );
+        const userExists = existingUsers.some(
+          (user: any) => user.username.toLowerCase() === username.toLowerCase(),
+        );
+        return !userExists;
+      } catch (error) {
+        console.warn("Error checking username in localStorage:", error);
+        // If localStorage fails, assume username is available
+        return true;
+      }
     }
 
     try {

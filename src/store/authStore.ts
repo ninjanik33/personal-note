@@ -60,46 +60,97 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         return { success: true };
       }
 
-      // For real Supabase authentication:
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: username, // Assuming username is email
-        password: password,
-      });
+      // First try localStorage for registered users
+      try {
+        const existingUsers = JSON.parse(localStorage.getItem("noteapp_users") || "[]");
+        const user = existingUsers.find((u: any) =>
+          (u.email.toLowerCase() === username.toLowerCase() || u.username.toLowerCase() === username.toLowerCase())
+          && u.password === password
+        );
 
-      if (error) {
-        console.error("Auth error:", error);
-        return { success: false };
-      }
+        if (user) {
+          // Check user profile for account status
+          const existingProfiles = JSON.parse(localStorage.getItem("noteapp_user_profiles") || "[]");
+          const profile = existingProfiles.find((p: any) => p.user_id === user.id);
 
-      if (data.user) {
-        // Check user profile and account status
-        try {
-          const profile = await userProfileAPI.getUserProfile(data.user.id);
-
-          if (profile.account_status !== "approved") {
-            // User account is not approved yet
-            await supabase.auth.signOut(); // Sign them out
+          if (profile && profile.account_status !== "approved") {
             return { success: false, status: profile.account_status };
           }
 
-          const user = {
-            username: profile.username || data.user.email || username,
-            id: data.user.id,
-            accountStatus: profile.account_status,
+          const authUser = {
+            username: user.username,
+            id: user.id,
+            accountStatus: profile?.account_status || "approved"
           };
+
+          // Store in localStorage for session
+          localStorage.setItem(
+            "noteapp_auth",
+            JSON.stringify({
+              user: authUser,
+              timestamp: Date.now(),
+            }),
+          );
 
           set({
             isAuthenticated: true,
-            user,
-            isLoading: false,
+            user: authUser,
+            isLoading: false
           });
 
           return { success: true };
-        } catch (profileError) {
-          console.error("Error fetching user profile:", profileError);
-          await supabase.auth.signOut();
-          return { success: false };
         }
+      } catch (localStorageError) {
+        console.warn("Error checking localStorage users:", localStorageError);
+      }
+
+      // Then try Supabase if available
+      if (supabase) {
+        try {
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email: username, // Assuming username is email
+            password: password,
+          });
+
+          if (error) {
+            console.error('Auth error:', error);
+            return { success: false };
+          }
+
+          if (data.user) {
+            // Check user profile and account status
+            try {
+              const profile = await userProfileAPI.getUserProfile(data.user.id);
+
+              if (profile.account_status !== "approved") {
+                // User account is not approved yet
+                await supabase.auth.signOut(); // Sign them out
+                return { success: false, status: profile.account_status };
+              }
+
+              const user = {
+                username: profile.username || data.user.email || username,
+                id: data.user.id,
+                accountStatus: profile.account_status
+              };
+
+              set({
+                isAuthenticated: true,
+                user,
+                isLoading: false
+              });
+
+              return { success: true };
+            } catch (profileError) {
+              console.error('Error fetching user profile:', profileError);
+              await supabase.auth.signOut();
+              return { success: false };
+            }
+          }
+        } catch (supabaseError) {
+          console.error('Supabase login error:', supabaseError);
+        }
+      }
       }
 
       return { success: false };

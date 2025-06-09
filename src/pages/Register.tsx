@@ -143,12 +143,13 @@ const Register = () => {
       setUsernameAvailable(available);
     } catch (error) {
       console.error("Error checking username:", error);
+      // If username checking fails, don't block the user
+      // Just show a neutral state and allow them to proceed
       setUsernameAvailable(null);
     } finally {
       setUsernameChecking(false);
     }
   };
-
   const handleInputChange = (field: keyof FormData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
 
@@ -168,7 +169,7 @@ const Register = () => {
           formData.username &&
           formData.password === formData.confirmPassword &&
           formData.password.length >= 8 &&
-          usernameAvailable === true &&
+          (usernameAvailable === true || usernameAvailable === null) && // Allow null (when checking fails)
           formData.terms_accepted
         );
       case 2:
@@ -684,7 +685,8 @@ const Register = () => {
               <AlertDescription>
                 <strong>Account Approval Required:</strong> Your account will be
                 created but requires manual approval before you can use the
-                application. You'll receive an email notification once approved.
+                application. Since this is a demo environment, you can check
+                back later or contact the administrator for approval.
               </AlertDescription>
             </Alert>
           </div>
