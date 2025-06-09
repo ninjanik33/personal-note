@@ -33,7 +33,7 @@ const transformDbNote = (dbNote: any): Note => ({
 export const databaseAPI = {
   // Categories
   async getCategories(userId: string): Promise<Category[]> {
-    if (!isSupabaseAvailable()) {
+    if (!isSupabaseAvailable() || !supabase) {
       throw new Error(
         "Supabase is not configured. Please check your environment variables.",
       );
@@ -83,6 +83,12 @@ export const databaseAPI = {
     name: string,
     color: string,
   ): Promise<Category> {
+    if (!isSupabaseAvailable() || !supabase) {
+      throw new Error(
+        "Supabase is not configured. Please check your environment variables.",
+      );
+    }
+
     try {
       const { data, error } = await supabase
         .from("categories")
@@ -107,6 +113,12 @@ export const databaseAPI = {
     categoryId: string,
     updates: { name?: string; color?: string },
   ): Promise<void> {
+    if (!isSupabaseAvailable() || !supabase) {
+      throw new Error(
+        "Supabase is not configured. Please check your environment variables.",
+      );
+    }
+
     try {
       const { error } = await supabase
         .from("categories")
@@ -121,6 +133,12 @@ export const databaseAPI = {
   },
 
   async deleteCategory(categoryId: string): Promise<void> {
+    if (!isSupabaseAvailable() || !supabase) {
+      throw new Error(
+        "Supabase is not configured. Please check your environment variables.",
+      );
+    }
+
     try {
       // Delete notes in subcategories of this category
       const { data: subcategories } = await supabase
@@ -163,6 +181,12 @@ export const databaseAPI = {
     name: string,
     categoryId: string,
   ): Promise<Subcategory> {
+    if (!isSupabaseAvailable() || !supabase) {
+      throw new Error(
+        "Supabase is not configured. Please check your environment variables.",
+      );
+    }
+
     try {
       const { data, error } = await supabase
         .from("subcategories")
@@ -187,6 +211,12 @@ export const databaseAPI = {
     subcategoryId: string,
     updates: { name?: string },
   ): Promise<void> {
+    if (!isSupabaseAvailable() || !supabase) {
+      throw new Error(
+        "Supabase is not configured. Please check your environment variables.",
+      );
+    }
+
     try {
       const { error } = await supabase
         .from("subcategories")
@@ -201,6 +231,12 @@ export const databaseAPI = {
   },
 
   async deleteSubcategory(subcategoryId: string): Promise<void> {
+    if (!isSupabaseAvailable() || !supabase) {
+      throw new Error(
+        "Supabase is not configured. Please check your environment variables.",
+      );
+    }
+
     try {
       // Delete notes in this subcategory
       await supabase.from("notes").delete().eq("subcategory_id", subcategoryId);
@@ -220,6 +256,12 @@ export const databaseAPI = {
 
   // Notes
   async getNotes(userId: string): Promise<Note[]> {
+    if (!isSupabaseAvailable() || !supabase) {
+      throw new Error(
+        "Supabase is not configured. Please check your environment variables.",
+      );
+    }
+
     try {
       const { data, error } = await supabase
         .from("notes")
@@ -245,6 +287,12 @@ export const databaseAPI = {
       tags?: string[];
     },
   ): Promise<Note> {
+    if (!isSupabaseAvailable() || !supabase) {
+      throw new Error(
+        "Supabase is not configured. Please check your environment variables.",
+      );
+    }
+
     try {
       const { data, error } = await supabase
         .from("notes")
@@ -278,6 +326,12 @@ export const databaseAPI = {
       images?: string[];
     },
   ): Promise<void> {
+    if (!isSupabaseAvailable() || !supabase) {
+      throw new Error(
+        "Supabase is not configured. Please check your environment variables.",
+      );
+    }
+
     try {
       const { error } = await supabase
         .from("notes")
@@ -295,6 +349,12 @@ export const databaseAPI = {
   },
 
   async deleteNote(noteId: string): Promise<void> {
+    if (!isSupabaseAvailable() || !supabase) {
+      throw new Error(
+        "Supabase is not configured. Please check your environment variables.",
+      );
+    }
+
     try {
       const { error } = await supabase.from("notes").delete().eq("id", noteId);
 
@@ -307,6 +367,12 @@ export const databaseAPI = {
 
   // Image storage (Supabase Storage)
   async uploadImage(file: File, userId: string): Promise<string> {
+    if (!isSupabaseAvailable() || !supabase) {
+      throw new Error(
+        "Supabase is not configured. Please check your environment variables.",
+      );
+    }
+
     try {
       const fileName = `${userId}/${Date.now()}_${file.name}`;
 
@@ -329,6 +395,12 @@ export const databaseAPI = {
   },
 
   async deleteImage(imagePath: string): Promise<void> {
+    if (!isSupabaseAvailable() || !supabase) {
+      throw new Error(
+        "Supabase is not configured. Please check your environment variables.",
+      );
+    }
+
     try {
       const { error } = await supabase.storage
         .from("note-images")

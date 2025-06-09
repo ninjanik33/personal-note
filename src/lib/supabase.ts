@@ -1,12 +1,27 @@
 import { createClient } from "@supabase/supabase-js";
 
-// These would normally come from environment variables
-// For demo purposes, you'll need to replace these with your actual Supabase project details
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "YOUR_SUPABASE_URL";
-const supabaseAnonKey =
-  import.meta.env.VITE_SUPABASE_ANON_KEY || "YOUR_SUPABASE_ANON_KEY";
+// Get Supabase credentials from environment variables
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Validate that Supabase credentials are properly configured
+const isSupabaseConfigured = () => {
+  return (
+    supabaseUrl &&
+    supabaseAnonKey &&
+    supabaseUrl.startsWith("https://") &&
+    supabaseUrl.includes(".supabase.co") &&
+    supabaseAnonKey.length > 20 // Basic validation for anon key
+  );
+};
+
+// Only create Supabase client if properly configured
+export const supabase = isSupabaseConfigured()
+  ? createClient(supabaseUrl!, supabaseAnonKey!)
+  : null;
+
+// Export helper function to check if Supabase is available
+export const isSupabaseAvailable = () => supabase !== null;
 
 // Database schema types
 export interface Database {
