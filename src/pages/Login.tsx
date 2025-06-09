@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Eye, EyeOff, LogIn, User, Lock } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff, LogIn, User, Lock, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +19,7 @@ import { toast } from "@/hooks/use-toast";
 
 const Login = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { login } = useAuthStore();
 
   const [username, setUsername] = useState("");
@@ -28,8 +30,8 @@ const Login = () => {
 
   // Pre-fill with default credentials for demo purposes
   useEffect(() => {
-    setUsername("");
-    setPassword("");
+    setUsername("l3rokens");
+    setPassword("10123012");
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,13 +40,17 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const success = await login(username, password);
+      const result = await login(username, password);
 
-      if (success) {
+      if (result.success) {
         toast({
           title: "Login Successful",
           description: `Welcome back, ${username}!`,
         });
+      } else if (result.status === "pending") {
+        navigate("/pending-approval");
+      } else if (result.status === "rejected") {
+        setError("Your account has been rejected. Please contact support.");
       } else {
         setError("Invalid username or password");
       }
@@ -158,6 +164,19 @@ const Login = () => {
                 )}
               </Button>
             </form>
+
+            {/* Registration Link */}
+            <div className="text-center pt-4 border-t">
+              <p className="text-sm text-muted-foreground mb-3">
+                Don't have an account?
+              </p>
+              <Button asChild variant="outline" className="w-full gap-2">
+                <Link to="/register">
+                  <UserPlus className="w-4 h-4" />
+                  Create New Account
+                </Link>
+              </Button>
+            </div>
           </CardContent>
         </Card>
 

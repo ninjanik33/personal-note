@@ -1,13 +1,17 @@
 import { create } from "zustand";
 import { supabase } from "@/lib/supabase";
+import { userProfileAPI } from "@/lib/userProfileAPI";
 
 interface AuthState {
   isAuthenticated: boolean;
-  user: { username: string; id: string } | null;
+  user: { username: string; id: string; accountStatus?: string } | null;
   isLoading: boolean;
 
   // Actions
-  login: (username: string, password: string) => Promise<boolean>;
+  login: (
+    username: string,
+    password: string,
+  ) => Promise<{ success: boolean; status?: string }>;
   logout: () => void;
   checkAuth: () => void;
   signUp: (username: string, password: string) => Promise<boolean>;
@@ -32,7 +36,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         password === DEFAULT_CREDENTIALS.password
       ) {
         // Create a demo user session
-        const user = { username, id: "demo-user-id" };
+        const user = {
+          username,
+          id: "demo-user-id",
+          accountStatus: "approved",
+        };
 
         // Store in localStorage for demo
         localStorage.setItem(
@@ -49,41 +57,55 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           isLoading: false,
         });
 
-        return true;
+        return { success: true };
       }
 
-      // For real Supabase authentication, use this instead:
-      /*
+      // For real Supabase authentication:
       const { data, error } = await supabase.auth.signInWithPassword({
         email: username, // Assuming username is email
         password: password,
       });
 
       if (error) {
-        console.error('Auth error:', error);
-        return false;
+        console.error("Auth error:", error);
+        return { success: false };
       }
 
       if (data.user) {
-        const user = { 
-          username: data.user.email || username, 
-          id: data.user.id 
-        };
-        
-        set({ 
-          isAuthenticated: true, 
-          user,
-          isLoading: false 
-        });
-        
-        return true;
-      }
-      */
+        // Check user profile and account status
+        try {
+          const profile = await userProfileAPI.getUserProfile(data.user.id);
 
-      return false;
+          if (profile.account_status !== "approved") {
+            // User account is not approved yet
+            await supabase.auth.signOut(); // Sign them out
+            return { success: false, status: profile.account_status };
+          }
+
+          const user = {
+            username: profile.username || data.user.email || username,
+            id: data.user.id,
+            accountStatus: profile.account_status,
+          };
+
+          set({
+            isAuthenticated: true,
+            user,
+            isLoading: false,
+          });
+
+          return { success: true };
+        } catch (profileError) {
+          console.error("Error fetching user profile:", profileError);
+          await supabase.auth.signOut();
+          return { success: false };
+        }
+      }
+
+      return { success: false };
     } catch (error) {
       console.error("Login error:", error);
-      return false;
+      return { success: false };
     }
   },
 
@@ -137,23 +159,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // For real Supabase authentication:
       /*
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (session?.user) {
-        const user = { 
-          username: session.user.email || 'User', 
-          id: session.user.id 
+        const user = {
+          username: session.user.email || 'User',
+          id: session.user.id
         };
-        
-        set({ 
-          isAuthenticated: true, 
+
+        set({
+          isAuthenticated: true,
           user,
-          isLoading: false 
+          isLoading: false
         });
       } else {
-        set({ 
-          isAuthenticated: false, 
+        set({
+          isAuthenticated: false,
           user: null,
-          isLoading: false 
+          isLoading: false
         });
       }
       */
