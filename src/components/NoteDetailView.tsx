@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Note } from "@/types/note";
 import { storage } from "@/lib/storage";
 
@@ -138,6 +139,9 @@ export const NoteDetailView = ({ note, onEdit }: NoteDetailViewProps) => {
         onOpenChange={() => setSelectedImage(null)}
       >
         <DialogContent className="max-w-4xl max-h-[90vh] p-0">
+          <VisuallyHidden>
+            <DialogTitle>Image Preview</DialogTitle>
+          </VisuallyHidden>
           {selectedImage && (
             <div className="relative">
               <img
