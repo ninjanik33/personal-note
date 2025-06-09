@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { toast } from "@/hooks/use-toast";
-import { AppHeader } from "@/components/AppHeader";
-import { NoteSidebar } from "@/components/NoteSidebar";
-import { NoteList } from "@/components/NoteList";
-import { NoteEditor } from "@/components/NoteEditor";
-import { NoteDetailView } from "@/components/NoteDetailView";
+import { AppHeader } from '@/components/AppHeader';
+import { NoteSidebar } from '@/components/NoteSidebar';
+import { NoteList } from '@/components/NoteList';
+import { NoteEditor } from '@/components/NoteEditor';
+import { NoteDetailView } from '@/components/NoteDetailView';
+import { UserOnboarding } from '@/components/UserOnboarding';
 import { useNoteStore } from "@/store/noteStore";
 import { useAppStore } from "@/store/appStore";
 import { Note } from "@/types/note";
@@ -280,38 +281,40 @@ const Index = () => {
                 onEdit={() => handleEditNote(selectedNote)}
               />
             ) : (
-              <Card className="h-full flex items-center justify-center">
-                <CardContent className="text-center">
-                  <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                  <CardTitle className="mb-2">{t("app.title")}</CardTitle>
-                  <p className="text-muted-foreground mb-4">
-                    {filteredNotes.length === 0
-                      ? "No notes found. Create your first note to get started!"
-                      : "Select a note to view or edit it"}
-                  </p>
-                  <div className="flex gap-2 justify-center">
-                    <Button onClick={handleCreateNewNote} className="gap-2">
-                      <Plus className="h-4 w-4" />
-                      {t("note.create")}
-                    </Button>
-                    {selectedSubcategoryId && (
-                      <Button
-                        onClick={() => handleCreateNote(selectedSubcategoryId)}
-                        variant="outline"
-                        className="gap-2"
-                      >
-                        <Plus className="h-4 w-4" />
-                        Quick Add to{" "}
-                        {
-                          categories
-                            .flatMap((cat) => cat.subcategories)
-                            .find((sub) => sub.id === selectedSubcategoryId)
-                            ?.name
+            <div className="h-full flex items-center justify-center p-8">
+              <div className="w-full max-w-2xl">
+                {categories.length === 0 && notes.length === 0 ? (
+                  <UserOnboarding />
+                ) : (
+                  <Card className="text-center">
+                    <CardContent className="p-8">
+                      <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                      <CardTitle className="mb-2">{t('app.title')}</CardTitle>
+                      <p className="text-muted-foreground mb-4">
+                        {filteredNotes.length === 0
+                          ? 'No notes found. Create your first note to get started!'
+                          : 'Select a note to view or edit it'
                         }
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
+                      </p>
+                      <div className="flex gap-2 justify-center">
+                        <Button onClick={handleCreateNewNote} className="gap-2">
+                          <Plus className="h-4 w-4" />
+                          {t('note.create')}
+                        </Button>
+                        {selectedSubcategoryId && (
+                          <Button onClick={() => handleCreateNote(selectedSubcategoryId)} variant="outline" className="gap-2">
+                            <Plus className="h-4 w-4" />
+                            Quick Add to {categories
+                              .flatMap(cat => cat.subcategories)
+                              .find(sub => sub.id === selectedSubcategoryId)?.name}
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </div>
               </Card>
             )}
           </div>
