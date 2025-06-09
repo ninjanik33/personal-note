@@ -17,6 +17,7 @@ import { useNoteStore } from "@/store/noteStore";
 import { isSupabaseAvailable } from "@/lib/supabase";
 import { SupabaseConnectionTester } from "./SupabaseConnectionTester";
 import { DatabaseSetupGuide } from "./DatabaseSetupGuide";
+import { UserAnalytics } from "./UserAnalytics";
 import { toast } from "@/hooks/use-toast";
 
 type DataSourceMode = "localStorage" | "supabase" | "customAPI";
@@ -147,8 +148,9 @@ export const DatabaseModeSelector = () => {
 
       <CardContent>
         <Tabs defaultValue="configuration" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="configuration">Configuration</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="setup-guide">Setup Guide</TabsTrigger>
           </TabsList>
 
@@ -294,6 +296,10 @@ export const DatabaseModeSelector = () => {
               key
               <br />• <code>VITE_API_BASE_URL</code> - Your custom API base URL
             </div>
+          </TabsContent>
+
+          <TabsContent value="analytics" className="mt-6">
+            <UserAnalytics />
           </TabsContent>
 
           <TabsContent value="setup-guide" className="mt-6">
