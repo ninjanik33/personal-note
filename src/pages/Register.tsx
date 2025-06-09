@@ -40,6 +40,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { EnvironmentStatus } from "@/components/EnvironmentStatus";
 import { userProfileAPI } from "@/lib/userProfileAPI";
 import { toast } from "@/hooks/use-toast";
 
@@ -722,6 +723,9 @@ const Register = () => {
           </CardHeader>
 
           <CardContent className="space-y-6">
+            {/* Environment Status */}
+            <EnvironmentStatus showInRegistration={true} />
+
             {/* Progress Steps */}
             <div className="flex justify-between items-center">
               {steps.map((step, index) => (
