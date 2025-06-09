@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useNoteStore } from "@/store/noteStore";
+import { isSupabaseAvailable } from "@/lib/supabase";
 import { toast } from "@/hooks/use-toast";
 
 export const DatabaseToggle = () => {
@@ -19,6 +20,17 @@ export const DatabaseToggle = () => {
   const { useDatabase, toggleDataSource, loadData, isLoading } = useNoteStore();
 
   const handleToggle = async () => {
+    // Check if trying to enable database mode without proper configuration
+    if (!useDatabase && !isSupabaseAvailable()) {
+      toast({
+        title: "Database Not Configured",
+        description:
+          "Please configure your database connection or use custom API mode.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       toggleDataSource();
       toast({
@@ -129,14 +141,36 @@ export const DatabaseToggle = () => {
           )}
         </div>
 
-        {useDatabase && (
-          <div className="text-xs text-muted-foreground p-2 bg-muted/50 rounded border">
-            <strong>Note:</strong> Make sure to configure your Supabase
-            credentials in the environment variables:
-            <br />• <code>VITE_SUPABASE_URL</code>
-            <br />• <code>VITE_SUPABASE_ANON_KEY</code>
-          </div>
-        )}
+        <div className="text-xs text-muted-foreground space-y-2">
+          {!isSupabaseAvailable() && (
+            <div className="p-2 bg-yellow-50 dark:bg-yellow-950/20 rounded border border-yellow-200 dark:border-yellow-800">
+              <strong className="text-yellow-900 dark:text-yellow-100">
+                ⚠️ Database Not Configured
+              </strong>
+              <br />
+              <span className="text-yellow-700 dark:text-yellow-300">
+                To use external database mode, configure:
+                <br />• <code>VITE_SUPABASE_URL</code> (for Supabase)
+                <br />• <code>VITE_SUPABASE_ANON_KEY</code> (for Supabase)
+                <br />
+                OR
+                <br />• <code>VITE_API_BASE_URL</code> (for custom API)
+              </span>
+            </div>
+          )}
+
+          {useDatabase && isSupabaseAvailable() && (
+            <div className="p-2 bg-green-50 dark:bg-green-950/20 rounded border border-green-200 dark:border-green-800">
+              <strong className="text-green-900 dark:text-green-100">
+                ✅ Supabase Connected
+              </strong>
+              <br />
+              <span className="text-green-700 dark:text-green-300">
+                Using Supabase for data storage.
+              </span>
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

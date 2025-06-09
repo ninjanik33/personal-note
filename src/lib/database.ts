@@ -1,4 +1,4 @@
-import { supabase } from "./supabase";
+import { supabase, isSupabaseAvailable } from "./supabase";
 import { Category, Note, Subcategory } from "@/types/note";
 
 // Helper function to transform database category to app category
@@ -33,6 +33,12 @@ const transformDbNote = (dbNote: any): Note => ({
 export const databaseAPI = {
   // Categories
   async getCategories(userId: string): Promise<Category[]> {
+    if (!isSupabaseAvailable()) {
+      throw new Error(
+        "Supabase is not configured. Please check your environment variables.",
+      );
+    }
+
     try {
       // Get categories
       const { data: categoriesData, error: categoriesError } = await supabase

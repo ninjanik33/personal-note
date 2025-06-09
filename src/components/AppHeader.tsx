@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { LanguageSwitcher } from "./LanguageSwitcher";
-import { DatabaseToggle } from "./DatabaseToggle";
+import { DatabaseModeSelector } from "./DatabaseModeSelector";
 import {
   Dialog,
   DialogContent,
@@ -58,7 +58,7 @@ export const AppHeader = () => {
             <DialogHeader>
               <DialogTitle>Application Settings</DialogTitle>
             </DialogHeader>
-            <DatabaseToggle />
+            <DatabaseModeSelector />
           </DialogContent>
         </Dialog>
 
