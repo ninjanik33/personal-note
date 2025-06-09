@@ -1,20 +1,19 @@
 import { create } from "zustand";
-import { storage } from "@/lib/storage";
+import { supabase } from "@/lib/supabase";
 
 interface AuthState {
   isAuthenticated: boolean;
-  user: { username: string } | null;
+  user: { username: string; id: string } | null;
   isLoading: boolean;
 
   // Actions
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
   checkAuth: () => void;
+  signUp: (username: string, password: string) => Promise<boolean>;
 }
 
-const AUTH_STORAGE_KEY = "noteapp_auth";
-
-// Default credentials
+// Default credentials for demo (you can remove this in production)
 const DEFAULT_CREDENTIALS = {
   username: "l3rokens",
   password: "10123012",
@@ -26,46 +25,141 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isLoading: true,
 
   login: async (username: string, password: string) => {
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      // For demo purposes, check against default credentials first
+      if (
+        username === DEFAULT_CREDENTIALS.username &&
+        password === DEFAULT_CREDENTIALS.password
+      ) {
+        // Create a demo user session
+        const user = { username, id: "demo-user-id" };
 
-    // Check credentials
-    if (
-      username === DEFAULT_CREDENTIALS.username &&
-      password === DEFAULT_CREDENTIALS.password
-    ) {
-      const user = { username };
+        // Store in localStorage for demo
+        localStorage.setItem(
+          "noteapp_auth",
+          JSON.stringify({
+            user,
+            timestamp: Date.now(),
+          }),
+        );
 
-      // Store auth state
-      localStorage.setItem(
-        AUTH_STORAGE_KEY,
-        JSON.stringify({ user, timestamp: Date.now() }),
-      );
+        set({
+          isAuthenticated: true,
+          user,
+          isLoading: false,
+        });
 
-      set({
-        isAuthenticated: true,
-        user,
-        isLoading: false,
+        return true;
+      }
+
+      // For real Supabase authentication, use this instead:
+      /*
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: username, // Assuming username is email
+        password: password,
       });
 
-      return true;
+      if (error) {
+        console.error('Auth error:', error);
+        return false;
+      }
+
+      if (data.user) {
+        const user = { 
+          username: data.user.email || username, 
+          id: data.user.id 
+        };
+        
+        set({ 
+          isAuthenticated: true, 
+          user,
+          isLoading: false 
+        });
+        
+        return true;
+      }
+      */
+
+      return false;
+    } catch (error) {
+      console.error("Login error:", error);
+      return false;
     }
-
-    return false;
   },
 
-  logout: () => {
-    localStorage.removeItem(AUTH_STORAGE_KEY);
-    set({
-      isAuthenticated: false,
-      user: null,
-      isLoading: false,
-    });
-  },
-
-  checkAuth: () => {
+  signUp: async (username: string, password: string) => {
     try {
-      const authData = localStorage.getItem(AUTH_STORAGE_KEY);
+      // For real Supabase authentication:
+      /*
+      const { data, error } = await supabase.auth.signUp({
+        email: username,
+        password: password,
+      });
+
+      if (error) {
+        console.error('Sign up error:', error);
+        return false;
+      }
+
+      return true;
+      */
+
+      // For demo, just return false (sign up not implemented)
+      return false;
+    } catch (error) {
+      console.error("Sign up error:", error);
+      return false;
+    }
+  },
+
+  logout: async () => {
+    try {
+      // For real Supabase authentication:
+      /*
+      await supabase.auth.signOut();
+      */
+
+      // For demo:
+      localStorage.removeItem("noteapp_auth");
+
+      set({
+        isAuthenticated: false,
+        user: null,
+        isLoading: false,
+      });
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  },
+
+  checkAuth: async () => {
+    try {
+      // For real Supabase authentication:
+      /*
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session?.user) {
+        const user = { 
+          username: session.user.email || 'User', 
+          id: session.user.id 
+        };
+        
+        set({ 
+          isAuthenticated: true, 
+          user,
+          isLoading: false 
+        });
+      } else {
+        set({ 
+          isAuthenticated: false, 
+          user: null,
+          isLoading: false 
+        });
+      }
+      */
+
+      // For demo, check localStorage:
+      const authData = localStorage.getItem("noteapp_auth");
 
       if (authData) {
         const { user, timestamp } = JSON.parse(authData);
@@ -83,7 +177,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         }
       }
 
-      // No valid auth found
       set({
         isAuthenticated: false,
         user: null,
