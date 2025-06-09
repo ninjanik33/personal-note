@@ -8,6 +8,8 @@ import Index from "./pages/Index";
 import Register from "./pages/Register";
 import PendingApproval from "./pages/PendingApproval";
 import NotFound from "./pages/NotFound";
+// Import user admin utilities for demo mode
+import "@/lib/localStorageUserUtils";
 
 const queryClient = new QueryClient();
 
