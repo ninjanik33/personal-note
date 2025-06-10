@@ -20,7 +20,7 @@ const Index = () => {
   const {
     categories,
     notes,
-    initialize,
+    loadData,
     searchNotes,
     getNotesBySubcategory,
     getNotesByCategory,
@@ -46,8 +46,8 @@ const Index = () => {
   // Initialize data
   useEffect(() => {
     loadAppState();
-    initialize();
-  }, [loadAppState, initialize]);
+    loadData();
+  }, [loadAppState, loadData]);
 
   // Get filtered notes based on current selection and search
   const filteredNotes = useMemo(() => {

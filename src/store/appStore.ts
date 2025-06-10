@@ -1,32 +1,39 @@
 import { create } from "zustand";
-import { AppState } from "@/types/note";
-import { storage } from "@/lib/storage";
 
-interface AppStore extends AppState {
+interface AppState {
+  // Selection state
+  selectedCategoryId: string | null;
+  selectedSubcategoryId: string | null;
+  selectedNoteId: string | null;
+
+  // Search and filter state
+  searchQuery: string;
+  selectedTags: string[];
+
+  // UI state
+  sidebarCollapsed: boolean;
+
   // Actions
   setSelectedCategory: (categoryId: string | null) => void;
   setSelectedSubcategory: (subcategoryId: string | null) => void;
   setSelectedNote: (noteId: string | null) => void;
   setSearchQuery: (query: string) => void;
   setSelectedTags: (tags: string[]) => void;
-  setLanguage: (language: "en" | "th" | "zh") => void;
-  setTheme: (theme: "light" | "dark") => void;
+  toggleSidebar: () => void;
   loadAppState: () => void;
   saveAppState: () => void;
-  clearSelection: () => void;
 }
 
-export const useAppStore = create<AppStore>((set, get) => ({
+export const useAppStore = create<AppState>((set, get) => ({
   // Initial state
   selectedCategoryId: null,
   selectedSubcategoryId: null,
   selectedNoteId: null,
   searchQuery: "",
   selectedTags: [],
-  language: "en",
-  theme: "light",
+  sidebarCollapsed: false,
 
-  // Actions
+  // Selection actions
   setSelectedCategory: (categoryId: string | null) => {
     set({
       selectedCategoryId: categoryId,
@@ -49,46 +56,31 @@ export const useAppStore = create<AppStore>((set, get) => ({
     get().saveAppState();
   },
 
+  // Search and filter actions
   setSearchQuery: (query: string) => {
     set({ searchQuery: query });
+    get().saveAppState();
   },
 
   setSelectedTags: (tags: string[]) => {
     set({ selectedTags: tags });
-  },
-
-  setLanguage: (language: "en" | "th" | "zh") => {
-    set({ language });
     get().saveAppState();
   },
 
-  setTheme: (theme: "light" | "dark") => {
-    set({ theme });
+  // UI actions
+  toggleSidebar: () => {
+    set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed }));
     get().saveAppState();
   },
 
+  // State persistence (in-memory only, no localStorage)
   loadAppState: () => {
-    const savedState = storage.getAppState();
-    set({ ...savedState });
+    // Keep default state - no persistent storage needed
+    // Selection state will be reset on page refresh
   },
 
   saveAppState: () => {
-    const state = get();
-    storage.saveAppState({
-      selectedCategoryId: state.selectedCategoryId,
-      selectedSubcategoryId: state.selectedSubcategoryId,
-      selectedNoteId: state.selectedNoteId,
-      language: state.language,
-      theme: state.theme,
-    });
-  },
-
-  clearSelection: () => {
-    set({
-      selectedCategoryId: null,
-      selectedSubcategoryId: null,
-      selectedNoteId: null,
-    });
-    get().saveAppState();
+    // No-op - we don't persist app state anymore
+    // Selection state is transient and resets on page refresh
   },
 }));
