@@ -114,27 +114,36 @@ export const useNoteStore = create<NoteStore>((set, get) => ({
 
     try {
       if (useDatabase && user) {
-        const newCategory = await databaseAPI.createCategory(
-          user.id,
-          data.name,
-          data.color,
-        );
-        const categories = [...get().categories, newCategory];
-        set({ categories });
-      } else {
-        // localStorage logic (existing)
-        const newCategory: Category = {
-          id: `cat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          name: data.name,
-          color: data.color,
-          subcategories: [],
-          createdAt: new Date(),
-        };
-
-        const categories = [...get().categories, newCategory];
-        set({ categories });
-        storage.saveCategories(categories);
+        try {
+          const newCategory = await databaseAPI.createCategory(
+            user.id,
+            data.name,
+            data.color,
+          );
+          const categories = [...get().categories, newCategory];
+          set({ categories });
+          return;
+        } catch (dbError) {
+          console.warn(
+            "Database operation failed, falling back to localStorage:",
+            dbError,
+          );
+          // Fall back to localStorage if database fails
+        }
       }
+
+      // localStorage logic (fallback or default)
+      const newCategory: Category = {
+        id: `cat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        name: data.name,
+        color: data.color,
+        subcategories: [],
+        createdAt: new Date(),
+      };
+
+      const categories = [...get().categories, newCategory];
+      set({ categories });
+      storage.saveCategories(categories);
     } catch (error) {
       console.error("Error creating category:", error);
       throw error;
