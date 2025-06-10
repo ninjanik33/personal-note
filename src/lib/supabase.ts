@@ -4,15 +4,35 @@ import { createClient } from "@supabase/supabase-js";
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+// Debug logging (remove in production)
+console.log("🔧 Supabase Configuration Debug:");
+console.log(
+  "URL:",
+  supabaseUrl ? `${supabaseUrl.substring(0, 20)}...` : "undefined",
+);
+console.log(
+  "Key:",
+  supabaseAnonKey ? `${supabaseAnonKey.substring(0, 20)}...` : "undefined",
+);
+
 // Validate that Supabase credentials are properly configured
 const isSupabaseConfigured = () => {
-  return (
+  const hasUrl = !!supabaseUrl;
+  const hasKey = !!supabaseAnonKey;
+  const validUrl =
     supabaseUrl &&
-    supabaseAnonKey &&
     supabaseUrl.startsWith("https://") &&
-    supabaseUrl.includes(".supabase.co") &&
-    supabaseAnonKey.length > 20 // Basic validation for anon key
-  );
+    supabaseUrl.includes(".supabase.co");
+  const validKey = supabaseAnonKey && supabaseAnonKey.length > 20;
+
+  console.log("🔧 Configuration checks:", {
+    hasUrl,
+    hasKey,
+    validUrl,
+    validKey,
+  });
+
+  return hasUrl && hasKey && validUrl && validKey;
 };
 
 // Only create Supabase client if properly configured
