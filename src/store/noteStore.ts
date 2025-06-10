@@ -58,6 +58,22 @@ export const useNoteStore = create<NoteStore>((set, get) => ({
   isLoading: false,
   useDatabase: false, // Start with localStorage, will auto-switch to Supabase if available
 
+  // Initialize the store and detect best data source
+  initialize: async () => {
+    // Check if Supabase is available and we have a user
+    const { user } = useAuthStore.getState();
+    const shouldUseDatabase = isSupabaseAvailable() && user;
+
+    if (shouldUseDatabase && !get().useDatabase) {
+      console.log(
+        "🔄 Supabase detected and user logged in, switching to database mode",
+      );
+      set({ useDatabase: true });
+    }
+
+    await get().loadData();
+  },
+
   toggleDataSource: () => {
     const currentUseDatabase = get().useDatabase;
     set({ useDatabase: !currentUseDatabase });
