@@ -21,6 +21,7 @@ interface NoteStore {
   useDatabase: boolean; // Toggle between localStorage and database
 
   // Actions
+  initialize: () => Promise<void>;
   loadData: () => Promise<void>;
   toggleDataSource: () => void;
 
