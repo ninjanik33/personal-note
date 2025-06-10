@@ -1,4 +1,4 @@
-import { supabase, isSupabaseAvailable } from "./supabase";
+import { supabase } from "./supabase";
 import { Category, Note, Subcategory } from "@/types/note";
 
 // Helper function to transform database category to app category
@@ -33,7 +33,7 @@ const transformDbNote = (dbNote: any): Note => ({
 export const databaseAPI = {
   // Categories
   async getCategories(userId: string): Promise<Category[]> {
-    if (!isSupabaseAvailable() || !supabase) {
+    if (!supabase) {
       throw new Error(
         "Supabase is not configured. Please check your environment variables.",
       );
@@ -83,7 +83,7 @@ export const databaseAPI = {
     name: string,
     color: string,
   ): Promise<Category> {
-    if (!isSupabaseAvailable() || !supabase) {
+    if (!supabase) {
       throw new Error(
         "Supabase is not configured. Please check your environment variables.",
       );
@@ -113,7 +113,7 @@ export const databaseAPI = {
     categoryId: string,
     updates: { name?: string; color?: string },
   ): Promise<void> {
-    if (!isSupabaseAvailable() || !supabase) {
+    if (!supabase) {
       throw new Error(
         "Supabase is not configured. Please check your environment variables.",
       );
@@ -133,7 +133,7 @@ export const databaseAPI = {
   },
 
   async deleteCategory(categoryId: string): Promise<void> {
-    if (!isSupabaseAvailable() || !supabase) {
+    if (!supabase) {
       throw new Error(
         "Supabase is not configured. Please check your environment variables.",
       );
@@ -181,7 +181,7 @@ export const databaseAPI = {
     name: string,
     categoryId: string,
   ): Promise<Subcategory> {
-    if (!isSupabaseAvailable() || !supabase) {
+    if (!supabase) {
       throw new Error(
         "Supabase is not configured. Please check your environment variables.",
       );
@@ -211,7 +211,7 @@ export const databaseAPI = {
     subcategoryId: string,
     updates: { name?: string },
   ): Promise<void> {
-    if (!isSupabaseAvailable() || !supabase) {
+    if (!supabase) {
       throw new Error(
         "Supabase is not configured. Please check your environment variables.",
       );
@@ -231,7 +231,7 @@ export const databaseAPI = {
   },
 
   async deleteSubcategory(subcategoryId: string): Promise<void> {
-    if (!isSupabaseAvailable() || !supabase) {
+    if (!supabase) {
       throw new Error(
         "Supabase is not configured. Please check your environment variables.",
       );
@@ -256,7 +256,7 @@ export const databaseAPI = {
 
   // Notes
   async getNotes(userId: string): Promise<Note[]> {
-    if (!isSupabaseAvailable() || !supabase) {
+    if (!supabase) {
       throw new Error(
         "Supabase is not configured. Please check your environment variables.",
       );
@@ -287,7 +287,7 @@ export const databaseAPI = {
       tags?: string[];
     },
   ): Promise<Note> {
-    if (!isSupabaseAvailable() || !supabase) {
+    if (!supabase) {
       throw new Error(
         "Supabase is not configured. Please check your environment variables.",
       );
@@ -326,7 +326,7 @@ export const databaseAPI = {
       images?: string[];
     },
   ): Promise<void> {
-    if (!isSupabaseAvailable() || !supabase) {
+    if (!supabase) {
       throw new Error(
         "Supabase is not configured. Please check your environment variables.",
       );
@@ -349,7 +349,7 @@ export const databaseAPI = {
   },
 
   async deleteNote(noteId: string): Promise<void> {
-    if (!isSupabaseAvailable() || !supabase) {
+    if (!supabase) {
       throw new Error(
         "Supabase is not configured. Please check your environment variables.",
       );
@@ -367,7 +367,7 @@ export const databaseAPI = {
 
   // Image storage (Supabase Storage)
   async uploadImage(file: File, userId: string): Promise<string> {
-    if (!isSupabaseAvailable() || !supabase) {
+    if (!supabase) {
       throw new Error(
         "Supabase is not configured. Please check your environment variables.",
       );
@@ -395,7 +395,7 @@ export const databaseAPI = {
   },
 
   async deleteImage(imagePath: string): Promise<void> {
-    if (!isSupabaseAvailable() || !supabase) {
+    if (!supabase) {
       throw new Error(
         "Supabase is not configured. Please check your environment variables.",
       );
