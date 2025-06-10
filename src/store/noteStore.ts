@@ -12,6 +12,7 @@ import { storage } from "@/lib/storage";
 import { databaseAPI } from "@/lib/database";
 import { createSampleData } from "@/lib/sampleData";
 import { useAuthStore } from "./authStore";
+import { isSupabaseAvailable } from "@/lib/supabase";
 
 interface NoteStore {
   // State
