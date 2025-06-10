@@ -56,7 +56,7 @@ export const useNoteStore = create<NoteStore>((set, get) => ({
   categories: [],
   notes: [],
   isLoading: false,
-  useDatabase: true, // Use Supabase by default
+  useDatabase: false, // Start with localStorage, will auto-switch to Supabase if available
 
   toggleDataSource: () => {
     const currentUseDatabase = get().useDatabase;
