@@ -22,17 +22,11 @@ const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuthStore();
 
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-
-  // Pre-fill with default credentials for demo purposes
-  useEffect(() => {
-    setUsername("l3rokens");
-    setPassword("10123012");
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,19 +34,19 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const result = await login(username, password);
+      const result = await login(email, password);
 
       if (result.success) {
         toast({
           title: "Login Successful",
-          description: `Welcome back, ${username}!`,
+          description: `Welcome back!`,
         });
       } else if (result.status === "pending") {
         navigate("/pending-approval");
       } else if (result.status === "rejected") {
         setError("Your account has been rejected. Please contact support.");
       } else {
-        setError("Invalid username or password");
+        setError(result.message || "Invalid email or password");
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -88,17 +82,17 @@ const Login = () => {
 
           <CardContent className="space-y-4">
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Username Field */}
+              {/* Email Field */}
               <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
+                <Label htmlFor="email">Email</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    id="username"
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Enter your username"
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
                     className="pl-10"
                     required
                     disabled={isLoading}
@@ -149,7 +143,7 @@ const Login = () => {
               <Button
                 type="submit"
                 className="w-full gap-2"
-                disabled={isLoading || !username || !password}
+                disabled={isLoading || !email || !password}
               >
                 {isLoading ? (
                   <>
