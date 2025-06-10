@@ -56,7 +56,7 @@ export const useNoteStore = create<NoteStore>((set, get) => ({
   categories: [],
   notes: [],
   isLoading: false,
-  useDatabase: false, // Start with localStorage for demo
+  useDatabase: true, // Use Supabase by default
 
   toggleDataSource: () => {
     const currentUseDatabase = get().useDatabase;

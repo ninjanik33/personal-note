@@ -30,37 +30,54 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   login: async (username: string, password: string) => {
     try {
-      // For demo purposes, check against default credentials first
-      if (
-        username === DEFAULT_CREDENTIALS.username &&
-        password === DEFAULT_CREDENTIALS.password
-      ) {
-        // Create a demo user session
-        const user = {
-          username,
-          id: "demo-user-id",
-          accountStatus: "approved",
-        };
+      // First try Supabase if available
+      if (supabase) {
+        try {
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email: username, // Assuming username is email
+            password: password,
+          });
 
-        // Store in localStorage for demo
-        localStorage.setItem(
-          "noteapp_auth",
-          JSON.stringify({
-            user,
-            timestamp: Date.now(),
-          }),
-        );
+          if (error) {
+            console.error("Auth error:", error);
+            // Continue to fallback methods if Supabase fails
+          } else if (data.user) {
+            // Check user profile and account status
+            try {
+              const profile = await userProfileAPI.getUserProfile(data.user.id);
 
-        set({
-          isAuthenticated: true,
-          user,
-          isLoading: false,
-        });
+              if (profile.account_status !== "approved") {
+                // User account is not approved yet
+                await supabase.auth.signOut(); // Sign them out
+                return { success: false, status: profile.account_status };
+              }
 
-        return { success: true };
+              const user = {
+                username: profile.username || data.user.email || username,
+                id: data.user.id,
+                accountStatus: profile.account_status,
+              };
+
+              set({
+                isAuthenticated: true,
+                user,
+                isLoading: false,
+              });
+
+              return { success: true };
+            } catch (profileError) {
+              console.error("Error fetching user profile:", profileError);
+              await supabase.auth.signOut();
+              // Continue to fallback methods if profile fetch fails
+            }
+          }
+        } catch (supabaseError) {
+          console.error("Supabase login error:", supabaseError);
+          // Continue to fallback methods if Supabase fails
+        }
       }
 
-      // First try localStorage for registered users
+      // Fallback: Try localStorage for registered users
       try {
         const existingUsers = JSON.parse(
           localStorage.getItem("noteapp_users") || "[]",
@@ -112,52 +129,34 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         console.warn("Error checking localStorage users:", localStorageError);
       }
 
-      // Then try Supabase if available
-      if (supabase) {
-        try {
-          const { data, error } = await supabase.auth.signInWithPassword({
-            email: username, // Assuming username is email
-            password: password,
-          });
+      // Final fallback: Demo credentials (for development/demo purposes)
+      if (
+        username === DEFAULT_CREDENTIALS.username &&
+        password === DEFAULT_CREDENTIALS.password
+      ) {
+        // Create a demo user session
+        const user = {
+          username,
+          id: "demo-user-id",
+          accountStatus: "approved",
+        };
 
-          if (error) {
-            console.error("Auth error:", error);
-            return { success: false };
-          }
+        // Store in localStorage for demo
+        localStorage.setItem(
+          "noteapp_auth",
+          JSON.stringify({
+            user,
+            timestamp: Date.now(),
+          }),
+        );
 
-          if (data.user) {
-            // Check user profile and account status
-            try {
-              const profile = await userProfileAPI.getUserProfile(data.user.id);
+        set({
+          isAuthenticated: true,
+          user,
+          isLoading: false,
+        });
 
-              if (profile.account_status !== "approved") {
-                // User account is not approved yet
-                await supabase.auth.signOut(); // Sign them out
-                return { success: false, status: profile.account_status };
-              }
-
-              const user = {
-                username: profile.username || data.user.email || username,
-                id: data.user.id,
-                accountStatus: profile.account_status,
-              };
-
-              set({
-                isAuthenticated: true,
-                user,
-                isLoading: false,
-              });
-
-              return { success: true };
-            } catch (profileError) {
-              console.error("Error fetching user profile:", profileError);
-              await supabase.auth.signOut();
-              return { success: false };
-            }
-          }
-        } catch (supabaseError) {
-          console.error("Supabase login error:", supabaseError);
-        }
+        return { success: true };
       }
 
       return { success: false };
@@ -194,12 +193,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: async () => {
     try {
-      // For real Supabase authentication:
-      /*
-      await supabase.auth.signOut();
-      */
+      // Sign out from Supabase if available
+      if (supabase) {
+        try {
+          await supabase.auth.signOut();
+        } catch (supabaseError) {
+          console.warn("Error signing out from Supabase:", supabaseError);
+        }
+      }
 
-      // For demo:
+      // Also clear localStorage session
       localStorage.removeItem("noteapp_auth");
 
       set({
@@ -214,31 +217,56 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   checkAuth: async () => {
     try {
-      // For real Supabase authentication:
-      /*
-      const { data: { session } } = await supabase.auth.getSession();
+      // First check Supabase session if available
+      if (supabase) {
+        try {
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
 
-      if (session?.user) {
-        const user = {
-          username: session.user.email || 'User',
-          id: session.user.id
-        };
+          if (session?.user) {
+            // Get user profile for additional info
+            try {
+              const profile = await userProfileAPI.getUserProfile(
+                session.user.id,
+              );
 
-        set({
-          isAuthenticated: true,
-          user,
-          isLoading: false
-        });
-      } else {
-        set({
-          isAuthenticated: false,
-          user: null,
-          isLoading: false
-        });
+              const user = {
+                username: profile.username || session.user.email || "User",
+                id: session.user.id,
+                accountStatus: profile.account_status,
+              };
+
+              set({
+                isAuthenticated: true,
+                user,
+                isLoading: false,
+              });
+              return;
+            } catch (profileError) {
+              console.warn("Error fetching user profile:", profileError);
+              // Use basic user info if profile fetch fails
+              const user = {
+                username: session.user.email || "User",
+                id: session.user.id,
+                accountStatus: "approved",
+              };
+
+              set({
+                isAuthenticated: true,
+                user,
+                isLoading: false,
+              });
+              return;
+            }
+          }
+        } catch (supabaseError) {
+          console.warn("Error checking Supabase session:", supabaseError);
+          // Continue to localStorage fallback
+        }
       }
-      */
 
-      // For demo, check localStorage:
+      // Fallback: check localStorage
       const authData = localStorage.getItem("noteapp_auth");
 
       if (authData) {
